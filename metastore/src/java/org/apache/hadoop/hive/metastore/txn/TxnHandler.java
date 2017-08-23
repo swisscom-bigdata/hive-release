@@ -32,6 +32,11 @@ import org.apache.hadoop.hive.common.classification.InterfaceStability;
 import org.apache.hadoop.hive.common.classification.RetrySemantics;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.hive.metastore.DatabaseProduct;
+import org.apache.hadoop.hive.metastore.HouseKeeperService;
+import org.apache.hadoop.hive.metastore.Warehouse;
+import org.apache.hadoop.hive.metastore.datasource.BoneCPDataSourceProvider;
+import org.apache.hadoop.hive.metastore.datasource.DataSourceProvider;
 import org.apache.commons.dbcp.PoolingDataSource;
 
 import org.apache.commons.pool.impl.GenericObjectPool;
@@ -52,6 +57,7 @@ import org.apache.hadoop.util.StringUtils;
 import javax.sql.DataSource;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.sql.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -3193,18 +3199,8 @@ abstract class TxnHandler implements TxnStore, TxnStore.MutexAPI {
       HiveConf.ConfVars.METASTORE_CONNECTION_POOLING_TYPE).toLowerCase();
 
     if ("bonecp".equals(connectionPooler)) {
-      BoneCPConfig config = new BoneCPConfig();
-      config.setJdbcUrl(driverUrl);
-      //if we are waiting for connection for a long time, something is really wrong
-      //better raise an error than hang forever
-      //see DefaultConnectionStrategy.getConnectionInternal()
-      config.setConnectionTimeoutInMs(getConnectionTimeoutMs);
-      config.setMaxConnectionsPerPartition(maxPoolSize);
-      config.setPartitionCount(1);
-      config.setUser(user);
-      config.setPassword(passwd);
       doRetryOnConnPool = true;  // Enable retries to work around BONECP bug.
-      return new BoneCPDataSource(config);
+      return new BoneCPDataSourceProvider().create(conf);
     } else if ("dbcp".equals(connectionPooler)) {
       GenericObjectPool objectPool = new GenericObjectPool();
       //https://commons.apache.org/proper/commons-pool/api-1.6/org/apache/commons/pool/impl/GenericObjectPool.html#setMaxActive(int)
@@ -3577,4 +3573,243 @@ abstract class TxnHandler implements TxnStore, TxnStore.MutexAPI {
       }
     }
   }
+  /**
+   * Helper class that generates SQL queries with syntax specific to target DB
+   * todo: why throw MetaException?
+   */
+  @VisibleForTesting
+  static final class SQLGenerator {
+    private final DatabaseProduct dbProduct;
+    private final HiveConf conf;
+    SQLGenerator(DatabaseProduct dbProduct, HiveConf conf) {
+      this.dbProduct = dbProduct;
+      this.conf = conf;
+    }
+    /**
+     * Genereates "Insert into T(a,b,c) values(1,2,'f'),(3,4,'c')" for appropriate DB
+     * @param tblColumns e.g. "T(a,b,c)"
+     * @param rows e.g. list of Strings like 3,4,'d'
+     * @return fully formed INSERT INTO ... statements
+     */
+    List<String> createInsertValuesStmt(String tblColumns, List<String> rows) {
+      if(rows == null || rows.size() == 0) {
+        return Collections.emptyList();
+      }
+      List<String> insertStmts = new ArrayList<>();
+      StringBuilder sb = new StringBuilder();
+      switch (dbProduct) {
+        case ORACLE:
+          if(rows.size() > 1) {
+            //http://www.oratable.com/oracle-insert-all/
+            //https://livesql.oracle.com/apex/livesql/file/content_BM1LJQ87M5CNIOKPOWPV6ZGR3.html
+            for (int numRows = 0; numRows < rows.size(); numRows++) {
+              if (numRows % conf.getIntVar(HiveConf.ConfVars.METASTORE_DIRECT_SQL_MAX_ELEMENTS_VALUES_CLAUSE) == 0) {
+                if (numRows > 0) {
+                  sb.append(" select * from dual");
+                  insertStmts.add(sb.toString());
+                }
+                sb.setLength(0);
+                sb.append("insert all ");
+              }
+              sb.append("into ").append(tblColumns).append(" values(").append(rows.get(numRows)).append(") ");
+            }
+            sb.append("select * from dual");
+            insertStmts.add(sb.toString());
+            return insertStmts;
+          }
+          //fall through
+        case DERBY:
+        case MYSQL:
+        case POSTGRES:
+        case SQLSERVER:
+          for(int numRows = 0; numRows < rows.size(); numRows++) {
+            if(numRows % conf.getIntVar(HiveConf.ConfVars.METASTORE_DIRECT_SQL_MAX_ELEMENTS_VALUES_CLAUSE) == 0) {
+              if(numRows > 0) {
+                insertStmts.add(sb.substring(0,  sb.length() - 1));//exclude trailing comma
+              }
+              sb.setLength(0);
+              sb.append("insert into ").append(tblColumns).append(" values");
+            }
+            sb.append('(').append(rows.get(numRows)).append("),");
+          }
+          insertStmts.add(sb.substring(0,  sb.length() - 1));//exclude trailing comma
+          return insertStmts;
+        default:
+          String msg = "Unrecognized database product name <" + dbProduct + ">";
+          LOG.error(msg);
+          throw new IllegalStateException(msg);
+      }
+    }
+    /**
+     * Given a {@code selectStatement}, decorated it with FOR UPDATE or semantically equivalent
+     * construct.  If the DB doesn't support, return original select.
+     */
+    String addForUpdateClause(String selectStatement) throws MetaException {
+      switch (dbProduct) {
+        case DERBY:
+          //https://db.apache.org/derby/docs/10.1/ref/rrefsqlj31783.html
+          //sadly in Derby, FOR UPDATE doesn't meant what it should
+          return selectStatement;
+        case MYSQL:
+          //http://dev.mysql.com/doc/refman/5.7/en/select.html
+        case ORACLE:
+          //https://docs.oracle.com/cd/E17952_01/refman-5.6-en/select.html
+        case POSTGRES:
+          //http://www.postgresql.org/docs/9.0/static/sql-select.html
+          return selectStatement + " for update";
+        case SQLSERVER:
+          //https://msdn.microsoft.com/en-us/library/ms189499.aspx
+          //https://msdn.microsoft.com/en-us/library/ms187373.aspx
+          String modifier = " with (updlock)";
+          int wherePos = selectStatement.toUpperCase().indexOf(" WHERE ");
+          if(wherePos < 0) {
+            return selectStatement + modifier;
+          }
+          return selectStatement.substring(0, wherePos) + modifier +
+            selectStatement.substring(wherePos, selectStatement.length());
+        default:
+          String msg = "Unrecognized database product name <" + dbProduct + ">";
+          LOG.error(msg);
+          throw new MetaException(msg);
+      }
+    }
+    /**
+     * Suppose you have a query "select a,b from T" and you want to limit the result set
+     * to the first 5 rows.  The mechanism to do that differs in different DBs.
+     * Make {@code noSelectsqlQuery} to be "a,b from T" and this method will return the
+     * appropriately modified row limiting query.
+     *
+     * Note that if {@code noSelectsqlQuery} contains a join, you must make sure that
+     * all columns are unique for Oracle.
+     */
+    private String addLimitClause(int numRows, String noSelectsqlQuery) throws MetaException {
+      switch (dbProduct) {
+        case DERBY:
+          //http://db.apache.org/derby/docs/10.7/ref/rrefsqljoffsetfetch.html
+          return "select " + noSelectsqlQuery + " fetch first " + numRows + " rows only";
+        case MYSQL:
+          //http://www.postgresql.org/docs/7.3/static/queries-limit.html
+        case POSTGRES:
+          //https://dev.mysql.com/doc/refman/5.0/en/select.html
+          return "select " + noSelectsqlQuery + " limit " + numRows;
+        case ORACLE:
+          //newer versions (12c and later) support OFFSET/FETCH
+          return "select * from (select " + noSelectsqlQuery + ") where rownum <= " + numRows;
+        case SQLSERVER:
+          //newer versions (2012 and later) support OFFSET/FETCH
+          //https://msdn.microsoft.com/en-us/library/ms189463.aspx
+          return "select TOP(" + numRows + ") " + noSelectsqlQuery;
+        default:
+          String msg = "Unrecognized database product name <" + dbProduct + ">";
+          LOG.error(msg);
+          throw new MetaException(msg);
+      }
+    }
+  }
+
+  private static class NoPoolConnectionPool implements DataSource {
+    // Note that this depends on the fact that no-one in this class calls anything but
+    // getConnection.  If you want to use any of the Logger or wrap calls you'll have to
+    // implement them.
+    private final HiveConf conf;
+    private Driver driver;
+    private String connString;
+    private String user;
+    private String passwd;
+
+    public NoPoolConnectionPool(HiveConf conf) {
+      this.conf = conf;
+    }
+
+    @Override
+    public Connection getConnection() throws SQLException {
+      if (user == null) {
+        user = HiveConf.getVar(conf, HiveConf.ConfVars.METASTORE_CONNECTION_USER_NAME);
+        try {
+          passwd = ShimLoader.getHadoopShims().getPassword(conf,
+            HiveConf.ConfVars.METASTOREPWD.varname);
+        } catch (IOException err) {
+          throw new SQLException("Error getting metastore password", err);
+        }
+      }
+      return getConnection(user, passwd);
+    }
+
+    @Override
+    public Connection getConnection(String username, String password) throws SQLException {
+      // Find the JDBC driver
+      if (driver == null) {
+        String driverName = conf.getVar(HiveConf.ConfVars.METASTORE_CONNECTION_DRIVER);
+        if (driverName == null || driverName.equals("")) {
+          String msg = "JDBC driver for transaction db not set in configuration " +
+              "file, need to set " + HiveConf.ConfVars.METASTORE_CONNECTION_DRIVER.varname;
+          LOG.error(msg);
+          throw new RuntimeException(msg);
+        }
+        try {
+          LOG.info("Going to load JDBC driver " + driverName);
+          driver = (Driver) Class.forName(driverName).newInstance();
+        } catch (InstantiationException e) {
+          throw new RuntimeException("Unable to instantiate driver " + driverName + ", " +
+              e.getMessage(), e);
+        } catch (IllegalAccessException e) {
+          throw new RuntimeException(
+              "Unable to access driver " + driverName + ", " + e.getMessage(),
+              e);
+        } catch (ClassNotFoundException e) {
+          throw new RuntimeException("Unable to find driver " + driverName + ", " + e.getMessage(),
+              e);
+        }
+        connString = conf.getVar(HiveConf.ConfVars.METASTORECONNECTURLKEY);
+      }
+
+      try {
+        LOG.info("Connecting to transaction db with connection string " + connString);
+        Properties connectionProps = new Properties();
+        connectionProps.setProperty("user", username);
+        connectionProps.setProperty("password", password);
+        Connection conn = driver.connect(connString, connectionProps);
+        conn.setAutoCommit(false);
+        return conn;
+      } catch (SQLException e) {
+        throw new RuntimeException("Unable to connect to transaction manager using " + connString
+            + ", " + e.getMessage(), e);
+      }
+    }
+
+    @Override
+    public PrintWriter getLogWriter() throws SQLException {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setLogWriter(PrintWriter out) throws SQLException {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setLoginTimeout(int seconds) throws SQLException {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public int getLoginTimeout() throws SQLException {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public java.util.logging.Logger getParentLogger() throws SQLFeatureNotSupportedException {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public <T> T unwrap(Class<T> iface) throws SQLException {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean isWrapperFor(Class<?> iface) throws SQLException {
+      throw new UnsupportedOperationException();
+    }
+  };
 }

@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.InetAddress;
 import java.net.URI;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -57,6 +58,7 @@ import javax.jdo.Query;
 import javax.jdo.Transaction;
 import javax.jdo.datastore.DataStoreCache;
 import javax.jdo.identity.IntIdentity;
+import javax.sql.DataSource;
 
 import com.google.common.collect.Maps;
 import org.antlr.runtime.CommonTokenStream;
@@ -114,6 +116,8 @@ import org.apache.hadoop.hive.metastore.api.Type;
 import org.apache.hadoop.hive.metastore.api.UnknownDBException;
 import org.apache.hadoop.hive.metastore.api.UnknownPartitionException;
 import org.apache.hadoop.hive.metastore.api.UnknownTableException;
+import org.apache.hadoop.hive.metastore.datasource.DataSourceProvider;
+import org.apache.hadoop.hive.metastore.datasource.DataSourceProviderFactory;
 import org.apache.hadoop.hive.metastore.model.MColumnDescriptor;
 import org.apache.hadoop.hive.metastore.model.MDBPrivilege;
 import org.apache.hadoop.hive.metastore.model.MDatabase;
@@ -489,14 +493,28 @@ public class ObjectStore implements RawStore, Configurable {
 
   private static synchronized PersistenceManagerFactory getPMF() {
     if (pmf == null) {
-      LOG.debug("Instantiating PMF with following properties:");
-      for (Object key : prop.keySet()){
-        LOG.debug("\t"+key+"=>"+prop.get(key));
+      HiveConf conf = new HiveConf(ObjectStore.class);
+      DataSourceProvider dsp = DataSourceProviderFactory.getDataSourceProvider(conf);
+      if (dsp == null) {
+        pmf = JDOHelper.getPersistenceManagerFactory(prop);
+      } else {
+        try {
+          DataSource ds = dsp.create(conf);
+          Map<Object, Object> dsProperties = new HashMap<>();
+          //Any preexisting datanucleus property should be passed along
+          dsProperties.putAll(prop);
+          dsProperties.put("datanucleus.ConnectionFactory", ds);
+          dsProperties.put("javax.jdo.PersistenceManagerFactoryClass",
+              "org.datanucleus.api.jdo.JDOPersistenceManagerFactory");
+          pmf = JDOHelper.getPersistenceManagerFactory(dsProperties);
+        } catch (SQLException e) {
+          LOG.warn("Could not create PersistenceManagerFactory using " +
+              "connection pool properties, will fall back", e);
+          pmf = JDOHelper.getPersistenceManagerFactory(prop);
+        }
       }
-      pmf = JDOHelper.getPersistenceManagerFactory(prop);
       DataStoreCache dsc = pmf.getDataStoreCache();
       if (dsc != null) {
-        HiveConf conf = new HiveConf(ObjectStore.class);
         String objTypes = HiveConf.getVar(conf, HiveConf.ConfVars.METASTORE_CACHE_PINOBJTYPES);
         LOG.info("Setting MetaStore object pin classes with hive.metastore.cache.pinobjtypes=\"" + objTypes + "\"");
         if (objTypes != null && objTypes.length() > 0) {
