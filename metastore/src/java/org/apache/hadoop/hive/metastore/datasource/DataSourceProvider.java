@@ -19,6 +19,7 @@ package org.apache.hadoop.hive.metastore.datasource;
 
 import com.google.common.collect.Iterables;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hive.conf.HiveConf;
 
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -57,6 +58,22 @@ public interface DataSourceProvider {
         hdpConfig, (entry -> entry.getKey() != null && entry.getKey().startsWith(factoryPrefix)))
         .forEach(entry -> dataSourceProps.put(entry.getKey(), entry.getValue()));
     return dataSourceProps;
+  }
+
+  static String getMetastoreJdbcUser(Configuration conf) {
+    return conf.get(HiveConf.ConfVars.METASTORE_CONNECTION_USER_NAME.varname);
+  }
+
+  static String getMetastoreJdbcPasswd(Configuration conf) throws SQLException {
+    try {
+      return HiveConf.getPassword(conf, HiveConf.ConfVars.METASTOREPWD);
+    } catch (IOException err) {
+      throw new SQLException("Error getting metastore password", err);
+    }
+  }
+
+  static String getMetastoreJdbcDriverUrl(Configuration conf) throws SQLException {
+    return conf.get(HiveConf.ConfVars.METASTORECONNECTURLKEY.varname);
   }
 
 }

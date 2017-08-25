@@ -134,7 +134,7 @@
     <hamcrest.version>1.3</hamcrest.version>
     <hbase.hadoop1.version>0.98.9-hadoop1</hbase.hadoop1.version>
     <hbase.hadoop2.version>1.1.2.2.6.5.0-SNAPSHOT</hbase.hadoop2.version>
-    <hikaricp.version>2.5.1</hikaricp.version>
+    <hikaricp.version>2.6.1</hikaricp.version>
     <!-- httpcomponents are not always in version sync -->
     <httpcomponents.client.version>4.4</httpcomponents.client.version>
     <httpcomponents.core.version>4.4</httpcomponents.core.version>

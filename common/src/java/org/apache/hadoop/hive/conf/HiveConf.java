@@ -50,6 +50,7 @@ import org.apache.hadoop.hive.conf.Validator.RangeValidator;
 import org.apache.hadoop.hive.conf.Validator.RatioValidator;
 import org.apache.hadoop.hive.conf.Validator.StringSet;
 import org.apache.hadoop.hive.conf.Validator.TimeValidator;
+import org.apache.hadoop.hive.conf.Validator.SizeValidator;
 import org.apache.hadoop.hive.shims.ShimLoader;
 import org.apache.hadoop.hive.shims.Utils;
 import org.apache.hadoop.mapred.JobConf;
@@ -2289,15 +2290,44 @@ public class HiveConf extends Configuration {
         "if an X-XSRF-HEADER header is not present"),
     HIVE_SECURITY_COMMAND_WHITELIST("hive.security.command.whitelist", "set,reset,dfs,add,list,delete,reload,compile",
         "Comma separated list of non-SQL Hive commands users are authorized to execute"),
-    HIVE_CONF_RESTRICTED_LIST("hive.conf.restricted.list",
-        "hive.security.authenticator.manager,hive.security.authorization.manager,hive.users.in.admin.role," +
-        "hive.server2.xsrf.filter.enabled," +
-        "hive.distcp.privileged.doAs," +
-        "bonecp.",
-        "Comma separated list of configuration options which are immutable at runtime"),
-    HIVE_CONF_HIDDEN_LIST("hive.conf.hidden.list",
-        METASTOREPWD.varname + "," + HIVE_SERVER2_SSL_KEYSTORE_PASSWORD.varname,
-        "Comma separated list of configuration options which should not be read by normal user like passwords"),
+        HIVE_CONF_RESTRICTED_LIST("hive.conf.restricted.list",
+            "hive.security.authenticator.manager,hive.security.authorization.manager," +
+            "hive.security.metastore.authorization.manager,hive.security.metastore.authenticator.manager," +
+            "hive.users.in.admin.role,hive.server2.xsrf.filter.enabled,hive.security.authorization.enabled," +
+                "hive.distcp.privileged.doAs," +
+                "hive.server2.authentication.ldap.baseDN," +
+                "hive.server2.authentication.ldap.url," +
+                "hive.server2.authentication.ldap.Domain," +
+                "hive.server2.authentication.ldap.groupDNPattern," +
+                "hive.server2.authentication.ldap.groupFilter," +
+                "hive.server2.authentication.ldap.userDNPattern," +
+                "hive.server2.authentication.ldap.userFilter," +
+                "hive.server2.authentication.ldap.groupMembershipKey," +
+                "hive.server2.authentication.ldap.userMembershipKey," +
+                "hive.server2.authentication.ldap.groupClassKey," +
+                "hive.server2.authentication.ldap.customLDAPQuery," +
+                "hive.spark.client.connect.timeout," +
+                "hive.spark.client.server.connect.timeout," +
+                "hive.spark.client.channel.log.level," +
+                "hive.spark.client.rpc.max.size," +
+                "hive.spark.client.rpc.threads," +
+                "hive.spark.client.secret.bits," +
+                "hive.spark.client.rpc.server.address," +
+                "hive.spark.client.rpc.server.port," +
+                "bonecp.,"+
+                "hikari.",
+            "Comma separated list of configuration options which are immutable at runtime"),
+            HIVE_CONF_HIDDEN_LIST("hive.conf.hidden.list",
+                METASTOREPWD.varname + "," + HIVE_SERVER2_SSL_KEYSTORE_PASSWORD.varname
+                // Adding the S3 credentials from Hadoop config to be hidden
+                + ",fs.s3.awsAccessKeyId"
+                + ",fs.s3.awsSecretAccessKey"
+                + ",fs.s3n.awsAccessKeyId"
+                + ",fs.s3n.awsSecretAccessKey"
+                + ",fs.s3a.access.key"
+                + ",fs.s3a.secret.key"
+                + ",fs.s3a.proxy.password",
+                "Comma separated list of configuration options which should not be read by normal user like passwords"),
 
     HIVE_MOVE_FILES_THREAD_COUNT("hive.mv.files.thread", 15, "Number of threads"
          + " used to move files in move task. Set it to 0 to disable multi-threaded file moves. This parameter is also used by"
@@ -2549,6 +2579,23 @@ public class HiveConf extends Configuration {
     HIVE_LOG_TRACE_ID("hive.log.trace.id", "",
         "Log tracing id that can be used by upstream clients for tracking respective logs. " +
         "Truncated to " + LOG_PREFIX_LENGTH + " characters. Defaults to use auto-generated session id."),
+    HIVE_CONF_INTERNAL_VARIABLE_LIST("hive.conf.internal.variable.list",
+            "hive.added.files.path,hive.added.jars.path,hive.added.archives.path",
+            "Comma separated list of variables which are used internally and should not be configurable."),
+
+    HIVE_QUERY_TIMEOUT_SECONDS("hive.query.timeout.seconds", "0s",
+            new TimeValidator(TimeUnit.SECONDS),
+            "Timeout for Running Query in seconds. A nonpositive value means infinite. " +
+            "If the query timeout is also set by thrift API call, the smaller one will be taken."),
+
+
+    HIVE_EXEC_INPUT_LISTING_MAX_THREADS("hive.exec.input.listing.max.threads", 0, new  SizeValidator(0L, true, 1024L, true),
+            "Maximum number of threads that Hive uses to list file information from file systems (recommended > 1 for blobstore)."),
+
+    HIVE_EXEC_MOVE_FILES_FROM_SOURCE_DIR("hive.exec.move.files.from.source.dir", false,
+            "When moving/renaming a directory from source to destination, individually move each \n" +
+            "file in the source directory, rather than renaming the source directory. This may \n" +
+            "help protect against files written to temp directories by runaway task attempts."),
 
     /* BLOBSTORE section */
 
@@ -2872,6 +2919,37 @@ public class HiveConf extends Configuration {
     return outUnit.convert(Long.valueOf(parsed[0].trim().trim()), unitFor(parsed[1].trim(), inputUnit));
   }
 
+  public static long toSizeBytes(String value) {
+    String[] parsed = parseNumberFollowedByUnit(value.trim());
+    return Long.parseLong(parsed[0].trim()) * multiplierFor(parsed[1].trim());
+  }
+
+  public static long multiplierFor(String unit) {
+    unit = unit.trim().toLowerCase();
+    if (unit.isEmpty() || unit.equals("b") || unit.equals("bytes")) {
+      return 1;
+    } else if (unit.equals("kb")) {
+      return 1024;
+    } else if (unit.equals("mb")) {
+      return 1024*1024;
+    } else if (unit.equals("gb")) {
+      return 1024*1024*1024;
+    } else if (unit.equals("tb")) {
+      return 1024*1024*1024*1024;
+    } else if (unit.equals("pb")) {
+      return 1024*1024*1024*1024*1024;
+    }
+    throw new IllegalArgumentException("Invalid size unit " + unit);
+  }
+
+  private static String[] parseNumberFollowedByUnit(String value) {
+    char[] chars = value.toCharArray();
+    int i = 0;
+    for (; i < chars.length && (chars[i] == '-' || Character.isDigit(chars[i])); i++) {
+    }
+    return new String[] {value.substring(0, i), value.substring(i)};
+  }
+
   private static String[] parseTime(String value) {
     char[] chars = value.toCharArray();
     int i = 0;
@@ -3016,7 +3094,7 @@ public class HiveConf extends Configuration {
     EncoderDecoder<String, String> encoderDecoder) {
     setVar(conf, var, encoderDecoder.encode(val));
   }
-  
+
   public static ConfVars getConfVars(String name) {
     return vars.get(name);
   }
@@ -3575,5 +3653,18 @@ public class HiveConf extends Configuration {
 
   public static void setLoadHiveServer2Config(boolean loadHiveServer2Config) {
     HiveConf.loadHiveServer2Config = loadHiveServer2Config;
+  }
+
+  /**
+   * Get a password from the configuration file.  This uses Hadoop's
+   * {@link Configuration#getPassword(String)} to handle getting secure passwords.
+   * @param conf configuration file to read from
+   * @param var configuration value to read
+   * @return the password as a string, or the default value.
+   * @throws IOException if thrown by Configuration.getPassword
+   */
+  public static String getPassword(Configuration conf, ConfVars var) throws IOException {
+    char[] pw = conf.getPassword(var.varname);
+    return pw == null ? var.defaultStrVal : new String(pw);
   }
 }
