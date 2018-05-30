@@ -20,6 +20,8 @@ package org.apache.hadoop.hive.metastore.datasource;
 import com.jolbox.bonecp.BoneCPDataSource;
 import com.zaxxer.hikari.HikariDataSource;
 import org.apache.hadoop.hive.conf.HiveConf;
+import org.apache.commons.dbcp.PoolingDataSource;
+import org.apache.hadoop.conf.Configuration;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,26 +38,34 @@ public class TestDataSourceProviderFactory {
     conf = new HiveConf();
     conf.setVar(HiveConf.ConfVars.METASTORE_CONNECTION_USER_NAME, "dummyUser");
     conf.setVar(HiveConf.ConfVars.METASTOREPWD, "dummyPass");
+    conf.unset(HiveConf.ConfVars.METASTORE_CONNECTION_POOLING_TYPE.getVarname());
   }
 
   @Test
   public void testNoDataSourceCreatedWithoutProps() throws SQLException {
 
+    HiveConf.setVar(conf, HiveConf.ConfVars.METASTORE_CONNECTION_POOLING_TYPE, "dummy");
+
     DataSourceProvider dsp = DataSourceProviderFactory.getDataSourceProvider(conf);
     Assert.assertNull(dsp);
+  }
 
-    conf.setVar(HiveConf.ConfVars.METASTORE_CONNECTION_POOLING_TYPE, BoneCPDataSourceProvider.BONECP);
+  @Test
+  public void testCanCreateDataSourceForSpecificProp() throws SQLException {
 
-    dsp = DataSourceProviderFactory.getDataSourceProvider(conf);
-    Assert.assertNull(dsp);
+    Assert.assertFalse(
+            DataSourceProviderFactory.hasProviderSpecificConfigurations(conf));
+
+    HiveConf.setVar(conf,HiveConf.ConfVars.METASTORE_CONNECTION_POOLING_TYPE, BoneCPDataSourceProvider.BONECP);
+    conf.set(BoneCPDataSourceProvider.BONECP + ".dummy.var", "dummy");
+    Assert.assertTrue(
+            DataSourceProviderFactory.hasProviderSpecificConfigurations(conf));
   }
 
   @Test
   public void testCreateBoneCpDataSource() throws SQLException {
 
-    conf.setVar(HiveConf.ConfVars.METASTORE_CONNECTION_POOLING_TYPE, BoneCPDataSourceProvider.BONECP);
-    conf.set(BoneCPDataSourceProvider.BONECP + ".firstProp", "value");
-    conf.set(BoneCPDataSourceProvider.BONECP + ".secondProp", "value");
+    HiveConf.setVar(conf,HiveConf.ConfVars.METASTORE_CONNECTION_POOLING_TYPE, BoneCPDataSourceProvider.BONECP);
 
     DataSourceProvider dsp = DataSourceProviderFactory.getDataSourceProvider(conf);
     Assert.assertNotNull(dsp);
@@ -67,7 +77,7 @@ public class TestDataSourceProviderFactory {
   @Test
   public void testSetBoneCpStringProperty() throws SQLException {
 
-    conf.setVar(HiveConf.ConfVars.METASTORE_CONNECTION_POOLING_TYPE, BoneCPDataSourceProvider.BONECP);
+    HiveConf.setVar(conf,HiveConf.ConfVars.METASTORE_CONNECTION_POOLING_TYPE, BoneCPDataSourceProvider.BONECP);
     conf.set(BoneCPDataSourceProvider.BONECP + ".initSQL", "select 1 from dual");
 
     DataSourceProvider dsp = DataSourceProviderFactory.getDataSourceProvider(conf);
@@ -81,7 +91,7 @@ public class TestDataSourceProviderFactory {
   @Test
   public void testSetBoneCpNumberProperty() throws SQLException {
 
-    conf.setVar(HiveConf.ConfVars.METASTORE_CONNECTION_POOLING_TYPE, BoneCPDataSourceProvider.BONECP);
+    HiveConf.setVar(conf,HiveConf.ConfVars.METASTORE_CONNECTION_POOLING_TYPE, BoneCPDataSourceProvider.BONECP);
     conf.set(BoneCPDataSourceProvider.BONECP + ".acquireRetryDelayInMs", "599");
 
     DataSourceProvider dsp = DataSourceProviderFactory.getDataSourceProvider(conf);
@@ -95,7 +105,7 @@ public class TestDataSourceProviderFactory {
   @Test
   public void testSetBoneCpBooleanProperty() throws SQLException {
 
-    conf.setVar(HiveConf.ConfVars.METASTORE_CONNECTION_POOLING_TYPE, BoneCPDataSourceProvider.BONECP);
+    HiveConf.setVar(conf,HiveConf.ConfVars.METASTORE_CONNECTION_POOLING_TYPE, BoneCPDataSourceProvider.BONECP);
     conf.set(BoneCPDataSourceProvider.BONECP + ".disableJMX", "true");
 
     DataSourceProvider dsp = DataSourceProviderFactory.getDataSourceProvider(conf);
@@ -109,7 +119,7 @@ public class TestDataSourceProviderFactory {
   @Test
   public void testCreateHikariCpDataSource() throws SQLException {
 
-    conf.setVar(HiveConf.ConfVars.METASTORE_CONNECTION_POOLING_TYPE, HikariCPDataSourceProvider.HIKARI);
+    HiveConf.setVar(conf,HiveConf.ConfVars.METASTORE_CONNECTION_POOLING_TYPE, HikariCPDataSourceProvider.HIKARI);
     // This is needed to prevent the HikariDataSource from trying to connect to the DB
     conf.set(HikariCPDataSourceProvider.HIKARI + ".initializationFailTimeout", "-1");
 
@@ -123,7 +133,7 @@ public class TestDataSourceProviderFactory {
   @Test
   public void testSetHikariCpStringProperty() throws SQLException {
 
-    conf.setVar(HiveConf.ConfVars.METASTORE_CONNECTION_POOLING_TYPE, HikariCPDataSourceProvider.HIKARI);
+    HiveConf.setVar(conf,HiveConf.ConfVars.METASTORE_CONNECTION_POOLING_TYPE, HikariCPDataSourceProvider.HIKARI);
     conf.set(HikariCPDataSourceProvider.HIKARI + ".connectionInitSql", "select 1 from dual");
     conf.set(HikariCPDataSourceProvider.HIKARI + ".initializationFailTimeout", "-1");
 
@@ -138,7 +148,7 @@ public class TestDataSourceProviderFactory {
   @Test
   public void testSetHikariCpNumberProperty() throws SQLException {
 
-    conf.setVar(HiveConf.ConfVars.METASTORE_CONNECTION_POOLING_TYPE, HikariCPDataSourceProvider.HIKARI);
+    HiveConf.setVar(conf,HiveConf.ConfVars.METASTORE_CONNECTION_POOLING_TYPE, HikariCPDataSourceProvider.HIKARI);
     conf.set(HikariCPDataSourceProvider.HIKARI + ".idleTimeout", "59999");
     conf.set(HikariCPDataSourceProvider.HIKARI + ".initializationFailTimeout", "-1");
 
@@ -153,7 +163,7 @@ public class TestDataSourceProviderFactory {
   @Test
   public void testSetHikariCpBooleanProperty() throws SQLException {
 
-    conf.setVar(HiveConf.ConfVars.METASTORE_CONNECTION_POOLING_TYPE, HikariCPDataSourceProvider.HIKARI);
+    HiveConf.setVar(conf,HiveConf.ConfVars.METASTORE_CONNECTION_POOLING_TYPE, HikariCPDataSourceProvider.HIKARI);
     conf.set(HikariCPDataSourceProvider.HIKARI + ".allowPoolSuspension", "false");
     conf.set(HikariCPDataSourceProvider.HIKARI + ".initializationFailTimeout", "-1");
 
@@ -163,5 +173,71 @@ public class TestDataSourceProviderFactory {
     DataSource ds = dsp.create(conf);
     Assert.assertTrue(ds instanceof HikariDataSource);
     Assert.assertEquals(false, ((HikariDataSource)ds).isAllowPoolSuspension());
+  }
+
+  @Test
+  public void testCreateDbCpDataSource() throws SQLException {
+
+    HiveConf.setVar(conf, HiveConf.ConfVars.METASTORE_CONNECTION_POOLING_TYPE, DbCPDataSourceProvider.DBCP);
+
+    DataSourceProvider dsp = DataSourceProviderFactory.getDataSourceProvider(conf);
+    Assert.assertNotNull(dsp);
+
+    DataSource ds = dsp.create(conf);
+    Assert.assertTrue(ds instanceof PoolingDataSource);
+  }
+
+  @Test
+  public void testHasProviderSpecificConfigurationBonecp() throws SQLException {
+
+    HiveConf.setVar(conf, HiveConf.ConfVars.METASTORE_CONNECTION_POOLING_TYPE, BoneCPDataSourceProvider.BONECP);
+
+    Assert.assertFalse(DataSourceProviderFactory.hasProviderSpecificConfigurations(conf));
+
+    conf.set("dbcp.dummyConf", "dummyValue");
+    Assert.assertFalse(DataSourceProviderFactory.hasProviderSpecificConfigurations(conf));
+
+    conf.set("hikaricp.dummyConf", "dummyValue");
+    Assert.assertFalse(DataSourceProviderFactory.hasProviderSpecificConfigurations(conf));
+
+    conf.set("bonecp.dummyConf", "dummyValue");
+    Assert.assertTrue(DataSourceProviderFactory.hasProviderSpecificConfigurations(conf));
+
+  }
+
+  @Test
+  public void testHasProviderSpecificConfigurationHikaricp() throws SQLException {
+
+    HiveConf.setVar(conf, HiveConf.ConfVars.METASTORE_CONNECTION_POOLING_TYPE, HikariCPDataSourceProvider.HIKARI);
+
+    Assert.assertFalse(DataSourceProviderFactory.hasProviderSpecificConfigurations(conf));
+
+    conf.set("dbcp.dummyConf", "dummyValue");
+    Assert.assertFalse(DataSourceProviderFactory.hasProviderSpecificConfigurations(conf));
+
+    conf.set("bonecp.dummyConf", "dummyValue");
+    Assert.assertFalse(DataSourceProviderFactory.hasProviderSpecificConfigurations(conf));
+
+    conf.set("hikaricp.dummyConf", "dummyValue");
+    Assert.assertTrue(DataSourceProviderFactory.hasProviderSpecificConfigurations(conf));
+
+  }
+
+  @Test
+  public void testHasProviderSpecificConfigurationDbcp() throws SQLException {
+
+    HiveConf.setVar(conf, HiveConf.ConfVars.METASTORE_CONNECTION_POOLING_TYPE, DbCPDataSourceProvider.DBCP);
+
+    Assert.assertFalse(DataSourceProviderFactory.hasProviderSpecificConfigurations(conf));
+
+    conf.set("hikaricp.dummyConf", "dummyValue");
+    Assert.assertFalse(DataSourceProviderFactory.hasProviderSpecificConfigurations(conf));
+
+    conf.set("bonecp.dummyConf", "dummyValue");
+    Assert.assertFalse(DataSourceProviderFactory.hasProviderSpecificConfigurations(conf));
+
+    conf.set("dbcp.dummyConf", "dummyValue");
+    Assert.assertTrue(DataSourceProviderFactory.hasProviderSpecificConfigurations(conf));
+
   }
 }

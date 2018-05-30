@@ -2706,6 +2706,18 @@ public class HiveConf extends Configuration {
       return validator == null ? null : validator.toDescription();
     }
 
+    /**
+     * If you are calling this, you're probably doing it wrong.  You shouldn't need to use the
+     * underlying variable name.  Use one of the getVar methods instead.  Only use this if you
+     * are 100% sure you know you're doing.  The reason for this is that MetastoreConf goes to a
+     * lot of trouble to make sure it checks both Hive and Metastore values for config keys.  If
+     * you call {@link Configuration#get(String)} you are undermining that.
+     * @return variable name
+     */
+    public String getVarname() {
+      return varname;
+    }    
+
     public String typeString() {
       String type = valType.typeString();
       if (valType == VarType.STRING && validator != null) {
