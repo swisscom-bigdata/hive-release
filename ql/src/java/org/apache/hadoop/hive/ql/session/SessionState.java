@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.google.common.collect.Maps;
 import org.apache.commons.lang.StringUtils;
@@ -143,7 +144,7 @@ public class SessionState {
   /**
    * The flag to indicate if the session already started so we can skip the init
    */
-  private boolean isStarted = false;
+  private AtomicBoolean isStarted = new AtomicBoolean(false);
   /*
    * HiveHistory Object
    */
@@ -524,13 +525,14 @@ public class SessionState {
    * multiple sessions - it must call this method with the new session object
    * when switching from one session to another.
    */
-  synchronized public static SessionState start(SessionState startSs) {
+  public static SessionState start(SessionState startSs) {
     setCurrentSessionState(startSs);
 
-    if (startSs.isStarted) {
-      return startSs;
+    synchronized(SessionState.class) {
+      if (!startSs.isStarted.compareAndSet(false, true)) {
+        return startSs;
+      }
     }
-    startSs.isStarted = true;
 
     if (startSs.hiveHist == null){
       if (startSs.getConf().getBoolVar(HiveConf.ConfVars.HIVE_SESSION_HISTORY_ENABLED)) {
