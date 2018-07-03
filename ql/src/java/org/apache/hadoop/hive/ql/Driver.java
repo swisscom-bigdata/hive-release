@@ -889,6 +889,11 @@ public class Driver implements CommandProcessor {
         //do not authorize temporary uris
         continue;
       }
+      if (privObject.getTyp() == Entity.Type.TABLE
+          && (privObject.getT() == null || privObject.getT().isTemporary())) {
+        // skip temporary tables from authorization
+        continue;
+      }
       //support for authorization on partitions needs to be added
       String dbname = null;
       String objName = null;

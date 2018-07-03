@@ -821,7 +821,7 @@ public class SemanticAnalyzer extends BaseSemanticAnalyzer {
     Path dataDir = null;
     if(!qb.getEncryptedTargetTablePaths().isEmpty()) {
       //currently only Insert into T values(...) is supported thus only 1 values clause
-      //and only 1 target table are possible.  If/when support for 
+      //and only 1 target table are possible.  If/when support for
       //select ... from values(...) is added an insert statement may have multiple
       //encrypted target tables.
       dataDir = ctx.getMRTmpPath(qb.getEncryptedTargetTablePaths().get(0).toUri());
@@ -1650,7 +1650,7 @@ public class SemanticAnalyzer extends BaseSemanticAnalyzer {
 
       for (String alias : tabAliases) {
         String tab_name = qb.getTabNameForAlias(alias);
-        
+
         // we first look for this alias from CTE, and then from catalog.
         /*
          * if this s a CTE reference: Add its AST as a SubQuery to this QB.
@@ -8613,7 +8613,7 @@ public class SemanticAnalyzer extends BaseSemanticAnalyzer {
 
     return new ObjectPair(res, tgtToNodeExprMap);
   }
-  
+
   boolean isCBOExecuted() {
     return false;
   }
@@ -10280,7 +10280,7 @@ public class SemanticAnalyzer extends BaseSemanticAnalyzer {
           colNames.add(col.getName());
           colTypes.add(col.getType());
         }
-        
+
         basicInfos.put(new HivePrivilegeObject(table.getDbName(), table.getTableName(), colNames),
             new MaskAndFilterInfo(colTypes, additionalTabInfo.toString(), alias, astNode, table.isView()));
       }
@@ -10310,7 +10310,7 @@ public class SemanticAnalyzer extends BaseSemanticAnalyzer {
       }
     }
   }
-  
+
   // We walk through the AST.
   // We replace all the TOK_TABREF by adding additional masking and filter if
   // the table needs to be masked or filtered.
@@ -10443,7 +10443,7 @@ public class SemanticAnalyzer extends BaseSemanticAnalyzer {
         return;
       }
       for (Node child : node.getChildren()) {
-        //each insert of multi insert looks like 
+        //each insert of multi insert looks like
         //(TOK_INSERT (TOK_INSERT_INTO (TOK_TAB (TOK_TABNAME T1)))
         if (((ASTNode) child).getToken().getType() != HiveParser.TOK_INSERT) {
           continue;
@@ -11339,7 +11339,7 @@ public class SemanticAnalyzer extends BaseSemanticAnalyzer {
       }
     }
 
-    addDbAndTabToOutputs(qualifiedTabName, TableType.MANAGED_TABLE);
+    addDbAndTabToOutputs(qualifiedTabName, TableType.MANAGED_TABLE, isTemporary);
 
     if (isTemporary) {
       if (partCols.size() > 0) {
@@ -11455,12 +11455,13 @@ public class SemanticAnalyzer extends BaseSemanticAnalyzer {
     return null;
   }
 
-  private void addDbAndTabToOutputs(String[] qualifiedTabName, TableType type) throws SemanticException {
+  private void addDbAndTabToOutputs(String[] qualifiedTabName, TableType type, boolean isTemporary) throws SemanticException {
     Database database  = getDatabase(qualifiedTabName[0]);
     outputs.add(new WriteEntity(database, WriteEntity.WriteType.DDL_SHARED));
 
     Table t = new Table(qualifiedTabName[0], qualifiedTabName[1]);
     t.setTableType(type);
+    t.setTemporary(isTemporary);
     outputs.add(new WriteEntity(t, WriteEntity.WriteType.DDL_NO_LOCK));
   }
 
@@ -11529,7 +11530,7 @@ public class SemanticAnalyzer extends BaseSemanticAnalyzer {
     rootTasks.add(TaskFactory.get(new DDLWork(getInputs(), getOutputs(),
         createVwDesc), conf));
 
-    addDbAndTabToOutputs(qualTabName, TableType.VIRTUAL_VIEW);
+    addDbAndTabToOutputs(qualTabName, TableType.VIRTUAL_VIEW, false);
     return selectStmt;
   }
 

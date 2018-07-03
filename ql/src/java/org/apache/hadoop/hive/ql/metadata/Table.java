@@ -67,6 +67,8 @@ import org.apache.hadoop.mapred.OutputFormat;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hive.common.util.ReflectionUtil;
 
+import com.google.common.base.Preconditions;
+
 /**
  * A Hive Table: is a fundamental unit of data in Hive that shares a common schema/DDL.
  *
@@ -957,6 +959,10 @@ public class Table implements Serializable {
 
   public boolean isTemporary() {
     return tTable.isTemporary();
+  }
+
+  public void setTemporary(boolean isTemporary) {
+    tTable.setTemporary(isTemporary);
   }
 
   public static boolean hasMetastoreBasedSchema(HiveConf conf, String serdeLib) {
