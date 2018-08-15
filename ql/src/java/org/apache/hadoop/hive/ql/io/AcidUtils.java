@@ -195,7 +195,7 @@ public class AcidUtils {
       }
     }
   };
-  
+
   private AcidUtils() {
     // NOT USED
   }
@@ -514,7 +514,7 @@ public class AcidUtils {
     public List<FileStatus> getAbortedDirectories() {
       return abortedDirectories;
     }
-    
+
     @Override
     public String toString() {
       return "Aborted Directories: " + abortedDirectories + "; isBaseInRawFormat: " + isBaseInRawFormat + "; original: "
@@ -1074,7 +1074,7 @@ public class AcidUtils {
     Boolean val = null;
     if (useFileIds != null) {
       val = useFileIds.value;
-    } 
+    }
     if (val == null || val) {
       try {
         childrenWithId = SHIMS.listLocatedHdfsStatus(fs, directory, hiddenFileFilter);
@@ -1199,7 +1199,7 @@ public class AcidUtils {
         Long.toString(writeIdList.getHighWatermark()),
               minOpenWriteId, bestBase.oldestBase.toString()));
     }
-    
+
     Path base = null;
     boolean isBaseInRawFormat = false;
     if (bestBase.status != null) {
@@ -1213,7 +1213,7 @@ public class AcidUtils {
         }
       }
     }
-    
+
     LOG.debug("in directory " + directory.toUri().toString() + " base = " + base + " deltas = " +
         deltas.size());
     /**
@@ -1309,7 +1309,7 @@ public class AcidUtils {
       originalDirectories.add(child);
     }
   }
-  
+
   private static void getChildState(Path candidateDirectory, List<HdfsDirSnapshot> dirSnapshots,
       ValidWriteIdList writeIdList, List<ParsedDelta> working, List<FileStatus> originalDirectories,
       List<HdfsFileStatusWithId> original, List<FileStatus> obsolete, TxnBase bestBase, boolean ignoreEmptyFiles,
@@ -1372,7 +1372,7 @@ public class AcidUtils {
       }
     }
   }
-  
+
   public static List<HdfsDirSnapshot> getHdfsDirSnapshots(final FileSystem fs, final Path path) throws IOException {
     try {
       Map<Path, HdfsDirSnapshot> dirToSnapshots = new HashMap<Path, HdfsDirSnapshot>();
@@ -1417,7 +1417,7 @@ public class AcidUtils {
   }
 
   /**
-   * DFS dir listing. 
+   * DFS dir listing.
    * Captures a dir and the corresponding list of files it contains,
    * with additional properties about the dir (like isBase etc)
    *
@@ -1426,40 +1426,40 @@ public class AcidUtils {
     public Path getPath();
 
     public void addOrcAcidFormatFile(FileStatus fStatus);
-    
+
     public FileStatus getOrcAcidFormatFile();
 
     public void addMetadataFile(FileStatus fStatus);
-    
+
     public FileStatus getMetadataFile(FileStatus fStatus);
 
     // FileStatus of this HDFS directory
     public FileStatus getFileStatus();
-    
+
     // Get the list of files if any within this directory
     public List<FileStatus> getFiles();
-    
+
     public void setFileStatus(FileStatus fStatus);
-    
+
     public void addFile(FileStatus file);
-    
+
     // File id or null
     public Long getFileId();
-    
+
     public Boolean isRawFormat();
-    
+
     public void setIsRawFormat(boolean isRawFormat);
-    
+
     public Boolean isBase();
-    
+
     public void setIsBase(boolean isBase);
-    
-    public Boolean isValidBase();    
-    
+
+    public Boolean isValidBase();
+
     public void setIsValidBase(boolean isValidBase);
-    
-    public Boolean isCompactedBase();    
-    
+
+    public Boolean isCompactedBase();
+
     public void setIsCompactedBase(boolean isCompactedBase);
   }
 
@@ -1480,22 +1480,22 @@ public class AcidUtils {
       this.fStatus = fStatus;
       this.files = files;
     }
-    
+
     public HdfsDirSnapshotImpl(Path path, FileStatus fStatus) {
       this.dirPath = path;
       this.fStatus = fStatus;
     }
-    
+
     @Override
     public Path getPath() {
       return dirPath;
     }
-    
+
     @Override
     public FileStatus getFileStatus() {
       return fStatus;
     }
-    
+
     @Override
     public void setFileStatus(FileStatus fStatus) {
       this.fStatus = fStatus;
@@ -1505,7 +1505,7 @@ public class AcidUtils {
     public List<FileStatus> getFiles() {
       return files;
     }
-    
+
     @Override
     public void addFile(FileStatus file) {
       files.add(file);
@@ -1520,7 +1520,7 @@ public class AcidUtils {
     public Boolean isRawFormat() {
       return isRawFormat;
     }
-    
+
     @Override
     public void setIsRawFormat(boolean isRawFormat) {
        this.isRawFormat = isRawFormat;
@@ -1543,7 +1543,7 @@ public class AcidUtils {
 
     @Override
     public void setIsBase(boolean isBase) {
-      this.isBase = isBase;  
+      this.isBase = isBase;
     }
 
     @Override
@@ -1553,14 +1553,14 @@ public class AcidUtils {
 
     @Override
     public void setIsCompactedBase(boolean isCompactedBase) {
-      this.isCompactedBase = isCompactedBase;     
+      this.isCompactedBase = isCompactedBase;
     }
 
     @Override
     public void addOrcAcidFormatFile(FileStatus fStatus) {
       this.orcAcidFormatFStatus = fStatus;
     }
-    
+
     @Override
     public FileStatus getOrcAcidFormatFile() {
       return orcAcidFormatFStatus;
@@ -1575,7 +1575,7 @@ public class AcidUtils {
     public FileStatus getMetadataFile(FileStatus fStatus) {
       return metadataFStatus;
     }
-    
+
     @Override
     public String toString() {
       StringBuilder sb = new StringBuilder();
@@ -1629,7 +1629,7 @@ public class AcidUtils {
     Boolean val = null;
     if (useFileIds != null) {
       val = useFileIds.value;
-    } 
+    }
     if (val == null || val) {
       try {
         childrenWithId = SHIMS.listLocatedHdfsStatus(fs, stat.getPath(), hiddenFileFilter);
@@ -2245,7 +2245,7 @@ public class AcidUtils {
       }
       return isRawFormatFile(dataFile, fs);
     }
-    
+
     public static boolean isRawFormatFile(Path dataFile, FileSystem fs) throws IOException {
       try {
         Reader reader = OrcFile.createReader(dataFile, OrcFile.readerOptions(fs.getConf()));
