@@ -802,7 +802,7 @@ public class TestInputOutputFormat {
       System.out.println("STATS TRACE END - " + testCaseName.getMethodName());
       int delta = readsAfter - readsBefore;
       //HIVE-16812 adds 1 read of the footer of each file
-      assertEquals(12, delta);
+      assertEquals(16, delta);
     } finally {
       MockFileSystem.clearGlobalFiles();
     }
