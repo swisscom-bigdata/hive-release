@@ -165,7 +165,7 @@ STAGE PLANS:
           GatherStats: false
           Filter Operator
             isSamplingPred: false
-            predicate: NVL((customer = 1),false) (type: boolean)
+            predicate: COALESCE((customer = 1),false) (type: boolean)
             Select Operator
               expressions: customer (type: int), dt (type: string)
               outputColumnNames: _col0, _col1
@@ -292,7 +292,7 @@ STAGE PLANS:
           GatherStats: false
           Filter Operator
             isSamplingPred: false
-            predicate: NVL(((dt = '2001-01-01') or (customer = 3)),false) (type: boolean)
+            predicate: COALESCE(((dt = '2001-01-01') or (customer = 3)),false) (type: boolean)
             Select Operator
               expressions: customer (type: int), dt (type: string)
               outputColumnNames: _col0, _col1
@@ -419,7 +419,7 @@ STAGE PLANS:
           GatherStats: false
           Filter Operator
             isSamplingPred: false
-            predicate: NVL(((dt = '2001-01-01') or (customer = 3)),false) (type: boolean)
+            predicate: COALESCE(((dt = '2001-01-01') or (customer = 3)),false) (type: boolean)
             Select Operator
               expressions: customer (type: int), dt (type: string)
               outputColumnNames: _col0, _col1
