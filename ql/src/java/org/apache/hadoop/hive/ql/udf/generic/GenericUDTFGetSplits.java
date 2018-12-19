@@ -281,6 +281,17 @@ public class GenericUDTFGetSplits extends GenericUDTF {
     // hive compiler is going to remove inner order by. disable that optimization until then.
     HiveConf.setBoolVar(conf, ConfVars.HIVE_REMOVE_ORDERBY_IN_SUBQUERY, false);
 
+    if(num == 0) {
+      //Schema only
+      try {
+        List<FieldSchema> fieldSchemas = ParseUtils.parseQueryAndGetSchema(conf, query);
+        Schema schema = new Schema(convertSchema(fieldSchemas));
+        return new PlanFragment(null, schema, null);
+      } catch (IOException | ParseException e) {
+        throw new HiveException(e);
+      }
+    }
+
     try {
       jc = DagUtils.getInstance().createConfiguration(conf);
     } catch (IOException e) {
@@ -721,16 +732,18 @@ public class GenericUDTFGetSplits extends GenericUDTF {
     }
   }
 
-  private Schema convertSchema(Object obj) throws HiveException {
-    org.apache.hadoop.hive.metastore.api.Schema schema = (org.apache.hadoop.hive.metastore.api.Schema) obj;
+  private List<FieldDesc> convertSchema(List<FieldSchema> fieldSchemas) {
     List<FieldDesc> colDescs = new ArrayList<FieldDesc>();
-    for (FieldSchema fs : schema.getFieldSchemas()) {
+    for (FieldSchema fs : fieldSchemas) {
       String colName = fs.getName();
       String typeString = fs.getType();
       colDescs.add(new FieldDesc(colName, TypeInfoUtils.getTypeInfoFromTypeString(typeString)));
     }
-    Schema Schema = new Schema(colDescs);
-    return Schema;
+    return colDescs;
+  }
+
+  private Schema convertSchema(org.apache.hadoop.hive.metastore.api.Schema schema) {
+    return new Schema(convertSchema(schema.getFieldSchemas()));
   }
 
   private String getTempTableStorageFormatString(HiveConf conf) {
