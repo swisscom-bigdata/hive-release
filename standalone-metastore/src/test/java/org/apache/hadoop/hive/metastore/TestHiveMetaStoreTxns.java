@@ -25,6 +25,11 @@ import org.apache.hadoop.hive.metastore.api.DataOperationType;
 import org.apache.hadoop.hive.metastore.api.HeartbeatTxnRangeResponse;
 import org.apache.hadoop.hive.metastore.api.LockResponse;
 import org.apache.hadoop.hive.metastore.api.LockState;
+import org.apache.hadoop.hive.metastore.api.MetaException;
+import org.apache.hadoop.hive.metastore.api.Table;
+import org.apache.hadoop.hive.metastore.api.TxnType;
+import org.apache.hadoop.hive.metastore.client.builder.DatabaseBuilder;
+import org.apache.hadoop.hive.metastore.client.builder.TableBuilder;
 import org.apache.hadoop.hive.metastore.conf.MetastoreConf;
 import org.apache.hadoop.hive.metastore.txn.TxnDbUtil;
 import org.junit.After;
@@ -250,6 +255,14 @@ public class TestHiveMetaStoreTxns {
     }
     Assert.assertTrue(sawThree);
     Assert.assertTrue(sawFive);
+  }
+
+  @Test
+  public void testOpenTxnWithType() throws Exception {
+    long txnId = client.openTxn("me", TxnType.DEFAULT);
+    client.commitTxn(txnId);
+    ValidTxnList validTxns = client.getValidTxns();
+    Assert.assertTrue(validTxns.isTxnValid(txnId));
   }
 
   @Before
