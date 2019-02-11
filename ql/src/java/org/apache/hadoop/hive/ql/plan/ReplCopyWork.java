@@ -93,7 +93,7 @@ public class ReplCopyWork extends CopyWork {
     this.needRecycle = needRecycle;
   }
 
-  public boolean getIsAutoPerge() {
+  public boolean getIsAutoPurge() {
     return isAutoPurge;
   }
 
