@@ -270,6 +270,7 @@ import org.apache.hadoop.hive.ql.session.SessionState;
 import org.apache.hadoop.hive.ql.stats.StatsUtils;
 import org.apache.hadoop.hive.serde.serdeConstants;
 import org.apache.hadoop.hive.serde2.AbstractSerDe;
+import org.apache.hadoop.hive.ql.wm.ExecutionTrigger;
 import org.apache.hadoop.hive.serde2.Deserializer;
 import org.apache.hadoop.hive.serde2.MetadataTypedColumnsetSerDe;
 import org.apache.hadoop.hive.serde2.SerDeSpec;
@@ -800,11 +801,21 @@ public class DDLTask extends Task<DDLWork> implements Serializable {
   }
 
   private int createWMTrigger(Hive db, CreateWMTriggerDesc desc) throws HiveException {
+    validateTrigger(desc.getTrigger());
     db.createWMTrigger(desc.getTrigger());
     return 0;
   }
 
+  private void validateTrigger(final WMTrigger trigger) throws HiveException {
+    try {
+      ExecutionTrigger.fromWMTrigger(trigger);
+    } catch (IllegalArgumentException e) {
+      throw new HiveException(e);
+    }
+  }
+
   private int alterWMTrigger(Hive db, AlterWMTriggerDesc desc) throws HiveException {
+    validateTrigger(desc.getTrigger());
     db.alterWMTrigger(desc.getTrigger());
     return 0;
   }
@@ -4722,7 +4733,7 @@ public class DDLTask extends Task<DDLWork> implements Serializable {
     List<SQLDefaultConstraint> defaultConstraints = crtTbl.getDefaultConstraints();
     List<SQLCheckConstraint> checkConstraints = crtTbl.getCheckConstraints();
     LOG.debug("creating table {} on {}",tbl.getFullyQualifiedName(),tbl.getDataLocation());
-    
+
 	boolean replDataLocationChanged = false;
     if (crtTbl.getReplicationSpec().isInReplicationScope()){
       // If in replication scope, we should check if the object we're looking at exists, and if so,
