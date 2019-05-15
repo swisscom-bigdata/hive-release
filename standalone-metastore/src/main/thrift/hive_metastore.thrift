@@ -29,6 +29,10 @@ namespace php metastore
 namespace cpp Apache.Hadoop.Hive
 
 const string DDL_TIME = "transient_lastDdlTime"
+const byte ACCESSTYPE_NONE       = 1;
+const byte ACCESSTYPE_READONLY   = 2;
+const byte ACCESSTYPE_WRITEONLY  = 4;
+const byte ACCESSTYPE_READWRITE  = 8;
 
 struct Version {
   1: string version,
@@ -422,75 +426,6 @@ struct StorageDescriptor {
   12: optional bool   storedAsSubDirectories       // stored as subdirectories or not
 }
 
-// table information
-struct Table {
-  1: string tableName,                // name of the table
-  2: string dbName,                   // database name ('default')
-  3: string owner,                    // owner of this table
-  4: i32    createTime,               // creation time of the table
-  5: i32    lastAccessTime,           // last access time (usually this will be filled from HDFS and shouldn't be relied on)
-  6: i32    retention,                // retention time
-  7: StorageDescriptor sd,            // storage descriptor of the table
-  8: list<FieldSchema> partitionKeys, // partition keys of the table. only primitive types are supported
-  9: map<string, string> parameters,   // to store comments or any other user level parameters
-  10: string viewOriginalText,         // original view text, null for non-view
-  11: string viewExpandedText,         // expanded view text, null for non-view
-  12: string tableType,                // table type enum, e.g. EXTERNAL_TABLE
-  13: optional PrincipalPrivilegeSet privileges,
-  14: optional bool temporary=false,
-  15: optional bool rewriteEnabled,     // rewrite enabled or not
-  16: optional CreationMetadata creationMetadata,   // only for MVs, it stores table names used and txn list at MV creation
-  17: optional string catName,          // Name of the catalog the table is in
-  18: optional PrincipalType ownerType = PrincipalType.USER, // owner type of this table (default to USER for backward compatibility)
-  19: optional i64 writeId=-1,
-  20: optional bool isStatsCompliant,
-  21: optional ColumnStatistics colStats // column statistics for table
-}
-
-struct Partition {
-  1: list<string> values // string value is converted to appropriate partition key type
-  2: string       dbName,
-  3: string       tableName,
-  4: i32          createTime,
-  5: i32          lastAccessTime,
-  6: StorageDescriptor   sd,
-  7: map<string, string> parameters,
-  8: optional PrincipalPrivilegeSet privileges,
-  9: optional string catName,
-  10: optional i64 writeId=-1,
-  11: optional bool isStatsCompliant,
-  12: optional ColumnStatistics colStats // column statistics for partition
-}
-
-struct PartitionWithoutSD {
-  1: list<string> values // string value is converted to appropriate partition key type
-  2: i32          createTime,
-  3: i32          lastAccessTime,
-  4: string       relativePath,
-  5: map<string, string> parameters,
-  6: optional PrincipalPrivilegeSet privileges
-}
-
-struct PartitionSpecWithSharedSD {
-  1: list<PartitionWithoutSD> partitions,
-  2: StorageDescriptor sd,
-}
-
-struct PartitionListComposingSpec {
-  1: list<Partition> partitions
-}
-
-struct PartitionSpec {
-  1: string dbName,
-  2: string tableName,
-  3: string rootPath,
-  4: optional PartitionSpecWithSharedSD sharedSDPartitionSpec,
-  5: optional PartitionListComposingSpec partitionList,
-  6: optional string catName,
-  7: optional i64 writeId=-1,
-  8: optional bool isStatsCompliant
-}
-
 // column statistics
 struct BooleanColumnStatsData {
 1: required i64 numTrues,
@@ -586,6 +521,78 @@ struct ColumnStatistics {
 2: required list<ColumnStatisticsObj> statsObj,
 3: optional bool isStatsCompliant // Are the stats isolation-level-compliant with the
                                                       // the calling query?
+}
+
+// table information
+struct Table {
+  1: string tableName,                // name of the table
+  2: string dbName,                   // database name ('default')
+  3: string owner,                    // owner of this table
+  4: i32    createTime,               // creation time of the table
+  5: i32    lastAccessTime,           // last access time (usually this will be filled from HDFS and shouldn't be relied on)
+  6: i32    retention,                // retention time
+  7: StorageDescriptor sd,            // storage descriptor of the table
+  8: list<FieldSchema> partitionKeys, // partition keys of the table. only primitive types are supported
+  9: map<string, string> parameters,   // to store comments or any other user level parameters
+  10: string viewOriginalText,         // original view text, null for non-view
+  11: string viewExpandedText,         // expanded view text, null for non-view
+  12: string tableType,                // table type enum, e.g. EXTERNAL_TABLE
+  13: optional PrincipalPrivilegeSet privileges,
+  14: optional bool temporary=false,
+  15: optional bool rewriteEnabled,     // rewrite enabled or not
+  16: optional CreationMetadata creationMetadata,   // only for MVs, it stores table names used and txn list at MV creation
+  17: optional string catName,          // Name of the catalog the table is in
+  18: optional PrincipalType ownerType = PrincipalType.USER, // owner type of this table (default to USER for backward compatibility)
+  19: optional i64 writeId=-1,
+  20: optional bool isStatsCompliant,
+  21: optional ColumnStatistics colStats // column statistics for table
+  23: optional byte accessType,
+  24: optional list<string> requiredReadCapabilities,
+  25: optional list<string> requiredWriteCapabilities
+}
+
+struct Partition {
+  1: list<string> values // string value is converted to appropriate partition key type
+  2: string       dbName,
+  3: string       tableName,
+  4: i32          createTime,
+  5: i32          lastAccessTime,
+  6: StorageDescriptor   sd,
+  7: map<string, string> parameters,
+  8: optional PrincipalPrivilegeSet privileges,
+  9: optional string catName,
+  10: optional i64 writeId=-1,
+  11: optional bool isStatsCompliant,
+  12: optional ColumnStatistics colStats // column statistics for partition
+}
+
+struct PartitionWithoutSD {
+  1: list<string> values // string value is converted to appropriate partition key type
+  2: i32          createTime,
+  3: i32          lastAccessTime,
+  4: string       relativePath,
+  5: map<string, string> parameters,
+  6: optional PrincipalPrivilegeSet privileges
+}
+
+struct PartitionSpecWithSharedSD {
+  1: list<PartitionWithoutSD> partitions,
+  2: StorageDescriptor sd,
+}
+
+struct PartitionListComposingSpec {
+  1: list<Partition> partitions
+}
+
+struct PartitionSpec {
+  1: string dbName,
+  2: string tableName,
+  3: string rootPath,
+  4: optional PartitionSpecWithSharedSD sharedSDPartitionSpec,
+  5: optional PartitionListComposingSpec partitionList,
+  6: optional string catName,
+  7: optional i64 writeId=-1,
+  8: optional bool isStatsCompliant
 }
 
 struct AggrStats {
@@ -827,7 +834,9 @@ struct GetPartitionsByNamesRequest {
   1: required string db_name,
   2: required string tbl_name,
   3: optional list<string> names,
-  4: optional bool get_col_stats
+  4: optional bool get_col_stats,
+  5: optional list<string> processorCapabilities,
+  6: optional string processorIdentifier
 }
 
 struct GetPartitionsByNamesResult {
@@ -842,6 +851,13 @@ enum ResourceType {
   JAR     = 1,
   FILE    = 2,
   ARCHIVE = 3,
+}
+
+// specifies which info to return with GetTablesExtRequest
+enum GetTablesExtRequestFields {
+  ACCESS_TYPE = 1,      // return accessType
+  PROCESSOR_CAPABILITIES = 2,    // return ALL Capabilities for each Tables
+  ALL = 2147483647
 }
 
 struct ResourceUri {
@@ -1287,7 +1303,6 @@ enum ClientCapability {
   INSERT_ONLY_TABLES = 2
 }
 
-
 struct ClientCapabilities {
   1: required list<ClientCapability> values
 }
@@ -1298,7 +1313,9 @@ struct GetTableRequest {
   3: optional ClientCapabilities capabilities,
   4: optional string catName,
   6: optional string validWriteIdList,
-  7: optional bool getColumnStats
+  7: optional bool getColumnStats,
+  8: optional list<string> processorCapabilities,
+  9: optional string processorIdentifier
 }
 
 struct GetTableResult {
@@ -1310,11 +1327,38 @@ struct GetTablesRequest {
   1: required string dbName,
   2: optional list<string> tblNames,
   3: optional ClientCapabilities capabilities,
-  4: optional string catName
+  4: optional string catName,
+  5: optional list<string> processorCapabilities,
+  6: optional string processorIdentifier
 }
 
 struct GetTablesResult {
   1: required list<Table> tables
+}
+
+struct GetTablesExtRequest {
+ 1: required string catalog,
+ 2: required string database,
+ 3: required string tableNamePattern,            // table name matching pattern
+ 4: required i32 requestedFields,               // ORed GetTablesExtRequestFields
+ 5: optional i32 limit,                          // maximum number of tables returned (0=all)
+ 6: optional list<string> processorCapabilities, // list of capabilities “possessed” by the client
+ 7: optional string processorIdentifier
+}
+
+// response to GetTablesExtRequest call
+struct ExtendedTableInfo {
+ 1: required string tblName,                    // always returned
+ 2: optional i32 accessType,                    // if AccessType set
+ 3: optional list<string> requiredReadCapabilities  // capabilities required for read access
+ 4: optional list<string> requiredWriteCapabilities // capabilities required for write access
+}
+
+struct GetDatabaseRequest {
+ 1: optional string name,
+ 2: optional string catalogName,
+ 3: optional list<string> processorCapabilities,
+ 4: optional string processorIdentifier
 }
 
 // Request type for cm_recycle
@@ -1631,6 +1675,19 @@ struct GetRuntimeStatsRequest {
   2: required i32 maxCreateTime
 }
 
+struct CreateTableRequest {
+   1: required Table table,
+   2: optional EnvironmentContext envContext,
+   3: optional list<SQLPrimaryKey> primaryKeys,
+   4: optional list<SQLForeignKey> foreignKeys,
+   5: optional list<SQLUniqueConstraint> uniqueConstraints,
+   6: optional list<SQLNotNullConstraint> notNullConstraints,
+   7: optional list<SQLDefaultConstraint> defaultConstraints,
+   8: optional list<SQLCheckConstraint> checkConstraints,
+   9: optional list<string> processorCapabilities,
+   10: optional string processorIdentifier
+}
+
 struct AlterPartitionsRequest {
   1: optional string catName,
   2: required string dbName,
@@ -1749,6 +1806,7 @@ service ThriftHiveMetastore extends fb303.FacebookService
 
   void create_database(1:Database database) throws(1:AlreadyExistsException o1, 2:InvalidObjectException o2, 3:MetaException o3)
   Database get_database(1:string name) throws(1:NoSuchObjectException o1, 2:MetaException o2)
+  Database get_database_req(1:GetDatabaseRequest request) throws(1:NoSuchObjectException o1, 2:MetaException o2)
   void drop_database(1:string name, 2:bool deleteData, 3:bool cascade) throws(1:NoSuchObjectException o1, 2:InvalidOperationException o2, 3:MetaException o3)
   list<string> get_databases(1:string pattern) throws(1:MetaException o1)
   list<string> get_all_databases() throws(1:MetaException o1)
@@ -1790,6 +1848,9 @@ service ThriftHiveMetastore extends fb303.FacebookService
       throws (1:AlreadyExistsException o1,
               2:InvalidObjectException o2, 3:MetaException o3,
               4:NoSuchObjectException o4)
+  void create_table_req(1:CreateTableRequest request) throws (1:AlreadyExistsException o1,
+        2:InvalidObjectException o2, 3:MetaException o3,
+        4:NoSuchObjectException o4)
   void drop_constraint(1:DropConstraintRequest req)
       throws(1:NoSuchObjectException o1, 2:MetaException o3)
   void add_primary_key(1:AddPrimaryKeyRequest req)
@@ -1826,6 +1887,7 @@ service ThriftHiveMetastore extends fb303.FacebookService
   Table get_table(1:string dbname, 2:string tbl_name)
                        throws (1:MetaException o1, 2:NoSuchObjectException o2)
   list<Table> get_table_objects_by_name(1:string dbname, 2:list<string> tbl_names)
+  list<ExtendedTableInfo> get_tables_ext(1: GetTablesExtRequest req) throws (1: MetaException o1)
   GetTableResult get_table_req(1:GetTableRequest req) throws (1:MetaException o1, 2:NoSuchObjectException o2)
   GetTablesResult get_table_objects_by_name_req(1:GetTablesRequest req)
 				   throws (1:MetaException o1, 2:InvalidOperationException o2, 3:UnknownDBException o3)

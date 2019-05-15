@@ -767,11 +767,21 @@ public class HiveMetaStoreClientPreCatalog implements IMetaStoreClient, AutoClos
   @Override
   public void createTable(Table tbl) throws AlreadyExistsException,
       InvalidObjectException, MetaException, NoSuchObjectException, TException {
-    createTable(tbl, null);
+    CreateTableRequest request = new CreateTableRequest(tbl);
+    createTable(request);
   }
 
   public void createTable(Table tbl, EnvironmentContext envContext) throws AlreadyExistsException,
+          InvalidObjectException, MetaException, NoSuchObjectException, TException {
+    CreateTableRequest request = new CreateTableRequest(tbl);
+    request.setEnvContext(envContext);
+    createTable(request);
+  }
+
+
+  public void createTable(CreateTableRequest request) throws AlreadyExistsException,
       InvalidObjectException, MetaException, NoSuchObjectException, TException {
+    Table tbl = request.getTable();
     HiveMetaHook hook = getHook(tbl);
     if (hook != null) {
       hook.preCreateTable(tbl);
@@ -779,7 +789,7 @@ public class HiveMetaStoreClientPreCatalog implements IMetaStoreClient, AutoClos
     boolean success = false;
     try {
       // Subclasses can override this step (for example, for temporary tables)
-      create_table_with_environment_context(tbl, envContext);
+      client.create_table_req(request);
       if (hook != null) {
         hook.commitCreateTable(tbl);
       }
@@ -1447,6 +1457,15 @@ public class HiveMetaStoreClientPreCatalog implements IMetaStoreClient, AutoClos
     req.setCapabilities(version);
     List<Table> tabs = client.get_table_objects_by_name_req(req).getTables();
     return fastpath ? tabs : deepCopyTables(filterHook.filterTables(tabs));
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public List<ExtendedTableInfo> getTablesExt(String catName, String dbName, String tablePattern,
+                 int requestedFields, int limit) throws MetaException, TException {
+    GetTablesExtRequest req = new GetTablesExtRequest(catName, dbName, tablePattern, requestedFields);
+    req.setLimit(limit);
+    return client.get_tables_ext(req);
   }
 
   /** {@inheritDoc} */

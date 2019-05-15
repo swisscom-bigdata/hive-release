@@ -67,6 +67,11 @@ class ThriftHiveMetastoreHandler : virtual public ThriftHiveMetastoreIf {
     printf("get_database\n");
   }
 
+  void get_database_req(Database& _return, const GetDatabaseRequest& request) {
+    // Your implementation goes here
+    printf("get_database_req\n");
+  }
+
   void drop_database(const std::string& name, const bool deleteData, const bool cascade) {
     // Your implementation goes here
     printf("drop_database\n");
@@ -140,6 +145,11 @@ class ThriftHiveMetastoreHandler : virtual public ThriftHiveMetastoreIf {
   void create_table_with_constraints(const Table& tbl, const std::vector<SQLPrimaryKey> & primaryKeys, const std::vector<SQLForeignKey> & foreignKeys, const std::vector<SQLUniqueConstraint> & uniqueConstraints, const std::vector<SQLNotNullConstraint> & notNullConstraints, const std::vector<SQLDefaultConstraint> & defaultConstraints, const std::vector<SQLCheckConstraint> & checkConstraints) {
     // Your implementation goes here
     printf("create_table_with_constraints\n");
+  }
+
+  void create_table_req(const CreateTableRequest& request) {
+    // Your implementation goes here
+    printf("create_table_req\n");
   }
 
   void drop_constraint(const DropConstraintRequest& req) {
@@ -235,6 +245,11 @@ class ThriftHiveMetastoreHandler : virtual public ThriftHiveMetastoreIf {
   void get_table_objects_by_name(std::vector<Table> & _return, const std::string& dbname, const std::vector<std::string> & tbl_names) {
     // Your implementation goes here
     printf("get_table_objects_by_name\n");
+  }
+
+  void get_tables_ext(std::vector<ExtendedTableInfo> & _return, const GetTablesExtRequest& req) {
+    // Your implementation goes here
+    printf("get_tables_ext\n");
   }
 
   void get_table_req(GetTableResult& _return, const GetTableRequest& req) {

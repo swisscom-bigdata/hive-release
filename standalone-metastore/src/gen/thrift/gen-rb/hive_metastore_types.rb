@@ -155,6 +155,14 @@ module ResourceType
   VALID_VALUES = Set.new([JAR, FILE, ARCHIVE]).freeze
 end
 
+module GetTablesExtRequestFields
+  ACCESS_TYPE = 1
+  PROCESSOR_CAPABILITIES = 2
+  ALL = 2147483647
+  VALUE_MAP = {1 => "ACCESS_TYPE", 2 => "PROCESSOR_CAPABILITIES", 2147483647 => "ALL"}
+  VALID_VALUES = Set.new([ACCESS_TYPE, PROCESSOR_CAPABILITIES, ALL]).freeze
+end
+
 module FileMetadataExprType
   ORC_SARG = 1
   VALUE_MAP = {1 => "ORC_SARG"}
@@ -1083,193 +1091,6 @@ class StorageDescriptor
   ::Thrift::Struct.generate_accessors self
 end
 
-class Table
-  include ::Thrift::Struct, ::Thrift::Struct_Union
-  TABLENAME = 1
-  DBNAME = 2
-  OWNER = 3
-  CREATETIME = 4
-  LASTACCESSTIME = 5
-  RETENTION = 6
-  SD = 7
-  PARTITIONKEYS = 8
-  PARAMETERS = 9
-  VIEWORIGINALTEXT = 10
-  VIEWEXPANDEDTEXT = 11
-  TABLETYPE = 12
-  PRIVILEGES = 13
-  TEMPORARY = 14
-  REWRITEENABLED = 15
-  CREATIONMETADATA = 16
-  CATNAME = 17
-  OWNERTYPE = 18
-  WRITEID = 19
-  ISSTATSCOMPLIANT = 20
-  COLSTATS = 21
-
-  FIELDS = {
-    TABLENAME => {:type => ::Thrift::Types::STRING, :name => 'tableName'},
-    DBNAME => {:type => ::Thrift::Types::STRING, :name => 'dbName'},
-    OWNER => {:type => ::Thrift::Types::STRING, :name => 'owner'},
-    CREATETIME => {:type => ::Thrift::Types::I32, :name => 'createTime'},
-    LASTACCESSTIME => {:type => ::Thrift::Types::I32, :name => 'lastAccessTime'},
-    RETENTION => {:type => ::Thrift::Types::I32, :name => 'retention'},
-    SD => {:type => ::Thrift::Types::STRUCT, :name => 'sd', :class => ::StorageDescriptor},
-    PARTITIONKEYS => {:type => ::Thrift::Types::LIST, :name => 'partitionKeys', :element => {:type => ::Thrift::Types::STRUCT, :class => ::FieldSchema}},
-    PARAMETERS => {:type => ::Thrift::Types::MAP, :name => 'parameters', :key => {:type => ::Thrift::Types::STRING}, :value => {:type => ::Thrift::Types::STRING}},
-    VIEWORIGINALTEXT => {:type => ::Thrift::Types::STRING, :name => 'viewOriginalText'},
-    VIEWEXPANDEDTEXT => {:type => ::Thrift::Types::STRING, :name => 'viewExpandedText'},
-    TABLETYPE => {:type => ::Thrift::Types::STRING, :name => 'tableType'},
-    PRIVILEGES => {:type => ::Thrift::Types::STRUCT, :name => 'privileges', :class => ::PrincipalPrivilegeSet, :optional => true},
-    TEMPORARY => {:type => ::Thrift::Types::BOOL, :name => 'temporary', :default => false, :optional => true},
-    REWRITEENABLED => {:type => ::Thrift::Types::BOOL, :name => 'rewriteEnabled', :optional => true},
-    CREATIONMETADATA => {:type => ::Thrift::Types::STRUCT, :name => 'creationMetadata', :class => ::CreationMetadata, :optional => true},
-    CATNAME => {:type => ::Thrift::Types::STRING, :name => 'catName', :optional => true},
-    OWNERTYPE => {:type => ::Thrift::Types::I32, :name => 'ownerType', :default =>     1, :optional => true, :enum_class => ::PrincipalType},
-    WRITEID => {:type => ::Thrift::Types::I64, :name => 'writeId', :default => -1, :optional => true},
-    ISSTATSCOMPLIANT => {:type => ::Thrift::Types::BOOL, :name => 'isStatsCompliant', :optional => true},
-    COLSTATS => {:type => ::Thrift::Types::STRUCT, :name => 'colStats', :class => ::ColumnStatistics, :optional => true}
-  }
-
-  def struct_fields; FIELDS; end
-
-  def validate
-    unless @ownerType.nil? || ::PrincipalType::VALID_VALUES.include?(@ownerType)
-      raise ::Thrift::ProtocolException.new(::Thrift::ProtocolException::UNKNOWN, 'Invalid value of field ownerType!')
-    end
-  end
-
-  ::Thrift::Struct.generate_accessors self
-end
-
-class Partition
-  include ::Thrift::Struct, ::Thrift::Struct_Union
-  VALUES = 1
-  DBNAME = 2
-  TABLENAME = 3
-  CREATETIME = 4
-  LASTACCESSTIME = 5
-  SD = 6
-  PARAMETERS = 7
-  PRIVILEGES = 8
-  CATNAME = 9
-  WRITEID = 10
-  ISSTATSCOMPLIANT = 11
-  COLSTATS = 12
-
-  FIELDS = {
-    VALUES => {:type => ::Thrift::Types::LIST, :name => 'values', :element => {:type => ::Thrift::Types::STRING}},
-    DBNAME => {:type => ::Thrift::Types::STRING, :name => 'dbName'},
-    TABLENAME => {:type => ::Thrift::Types::STRING, :name => 'tableName'},
-    CREATETIME => {:type => ::Thrift::Types::I32, :name => 'createTime'},
-    LASTACCESSTIME => {:type => ::Thrift::Types::I32, :name => 'lastAccessTime'},
-    SD => {:type => ::Thrift::Types::STRUCT, :name => 'sd', :class => ::StorageDescriptor},
-    PARAMETERS => {:type => ::Thrift::Types::MAP, :name => 'parameters', :key => {:type => ::Thrift::Types::STRING}, :value => {:type => ::Thrift::Types::STRING}},
-    PRIVILEGES => {:type => ::Thrift::Types::STRUCT, :name => 'privileges', :class => ::PrincipalPrivilegeSet, :optional => true},
-    CATNAME => {:type => ::Thrift::Types::STRING, :name => 'catName', :optional => true},
-    WRITEID => {:type => ::Thrift::Types::I64, :name => 'writeId', :default => -1, :optional => true},
-    ISSTATSCOMPLIANT => {:type => ::Thrift::Types::BOOL, :name => 'isStatsCompliant', :optional => true},
-    COLSTATS => {:type => ::Thrift::Types::STRUCT, :name => 'colStats', :class => ::ColumnStatistics, :optional => true}
-  }
-
-  def struct_fields; FIELDS; end
-
-  def validate
-  end
-
-  ::Thrift::Struct.generate_accessors self
-end
-
-class PartitionWithoutSD
-  include ::Thrift::Struct, ::Thrift::Struct_Union
-  VALUES = 1
-  CREATETIME = 2
-  LASTACCESSTIME = 3
-  RELATIVEPATH = 4
-  PARAMETERS = 5
-  PRIVILEGES = 6
-
-  FIELDS = {
-    VALUES => {:type => ::Thrift::Types::LIST, :name => 'values', :element => {:type => ::Thrift::Types::STRING}},
-    CREATETIME => {:type => ::Thrift::Types::I32, :name => 'createTime'},
-    LASTACCESSTIME => {:type => ::Thrift::Types::I32, :name => 'lastAccessTime'},
-    RELATIVEPATH => {:type => ::Thrift::Types::STRING, :name => 'relativePath'},
-    PARAMETERS => {:type => ::Thrift::Types::MAP, :name => 'parameters', :key => {:type => ::Thrift::Types::STRING}, :value => {:type => ::Thrift::Types::STRING}},
-    PRIVILEGES => {:type => ::Thrift::Types::STRUCT, :name => 'privileges', :class => ::PrincipalPrivilegeSet, :optional => true}
-  }
-
-  def struct_fields; FIELDS; end
-
-  def validate
-  end
-
-  ::Thrift::Struct.generate_accessors self
-end
-
-class PartitionSpecWithSharedSD
-  include ::Thrift::Struct, ::Thrift::Struct_Union
-  PARTITIONS = 1
-  SD = 2
-
-  FIELDS = {
-    PARTITIONS => {:type => ::Thrift::Types::LIST, :name => 'partitions', :element => {:type => ::Thrift::Types::STRUCT, :class => ::PartitionWithoutSD}},
-    SD => {:type => ::Thrift::Types::STRUCT, :name => 'sd', :class => ::StorageDescriptor}
-  }
-
-  def struct_fields; FIELDS; end
-
-  def validate
-  end
-
-  ::Thrift::Struct.generate_accessors self
-end
-
-class PartitionListComposingSpec
-  include ::Thrift::Struct, ::Thrift::Struct_Union
-  PARTITIONS = 1
-
-  FIELDS = {
-    PARTITIONS => {:type => ::Thrift::Types::LIST, :name => 'partitions', :element => {:type => ::Thrift::Types::STRUCT, :class => ::Partition}}
-  }
-
-  def struct_fields; FIELDS; end
-
-  def validate
-  end
-
-  ::Thrift::Struct.generate_accessors self
-end
-
-class PartitionSpec
-  include ::Thrift::Struct, ::Thrift::Struct_Union
-  DBNAME = 1
-  TABLENAME = 2
-  ROOTPATH = 3
-  SHAREDSDPARTITIONSPEC = 4
-  PARTITIONLIST = 5
-  CATNAME = 6
-  WRITEID = 7
-  ISSTATSCOMPLIANT = 8
-
-  FIELDS = {
-    DBNAME => {:type => ::Thrift::Types::STRING, :name => 'dbName'},
-    TABLENAME => {:type => ::Thrift::Types::STRING, :name => 'tableName'},
-    ROOTPATH => {:type => ::Thrift::Types::STRING, :name => 'rootPath'},
-    SHAREDSDPARTITIONSPEC => {:type => ::Thrift::Types::STRUCT, :name => 'sharedSDPartitionSpec', :class => ::PartitionSpecWithSharedSD, :optional => true},
-    PARTITIONLIST => {:type => ::Thrift::Types::STRUCT, :name => 'partitionList', :class => ::PartitionListComposingSpec, :optional => true},
-    CATNAME => {:type => ::Thrift::Types::STRING, :name => 'catName', :optional => true},
-    WRITEID => {:type => ::Thrift::Types::I64, :name => 'writeId', :default => -1, :optional => true},
-    ISSTATSCOMPLIANT => {:type => ::Thrift::Types::BOOL, :name => 'isStatsCompliant', :optional => true}
-  }
-
-  def struct_fields; FIELDS; end
-
-  def validate
-  end
-
-  ::Thrift::Struct.generate_accessors self
-end
-
 class BooleanColumnStatsData
   include ::Thrift::Struct, ::Thrift::Struct_Union
   NUMTRUES = 1
@@ -1617,6 +1438,199 @@ class ColumnStatistics
   def validate
     raise ::Thrift::ProtocolException.new(::Thrift::ProtocolException::UNKNOWN, 'Required field statsDesc is unset!') unless @statsDesc
     raise ::Thrift::ProtocolException.new(::Thrift::ProtocolException::UNKNOWN, 'Required field statsObj is unset!') unless @statsObj
+  end
+
+  ::Thrift::Struct.generate_accessors self
+end
+
+class Table
+  include ::Thrift::Struct, ::Thrift::Struct_Union
+  TABLENAME = 1
+  DBNAME = 2
+  OWNER = 3
+  CREATETIME = 4
+  LASTACCESSTIME = 5
+  RETENTION = 6
+  SD = 7
+  PARTITIONKEYS = 8
+  PARAMETERS = 9
+  VIEWORIGINALTEXT = 10
+  VIEWEXPANDEDTEXT = 11
+  TABLETYPE = 12
+  PRIVILEGES = 13
+  TEMPORARY = 14
+  REWRITEENABLED = 15
+  CREATIONMETADATA = 16
+  CATNAME = 17
+  OWNERTYPE = 18
+  WRITEID = 19
+  ISSTATSCOMPLIANT = 20
+  COLSTATS = 21
+  ACCESSTYPE = 23
+  REQUIREDREADCAPABILITIES = 24
+  REQUIREDWRITECAPABILITIES = 25
+
+  FIELDS = {
+    TABLENAME => {:type => ::Thrift::Types::STRING, :name => 'tableName'},
+    DBNAME => {:type => ::Thrift::Types::STRING, :name => 'dbName'},
+    OWNER => {:type => ::Thrift::Types::STRING, :name => 'owner'},
+    CREATETIME => {:type => ::Thrift::Types::I32, :name => 'createTime'},
+    LASTACCESSTIME => {:type => ::Thrift::Types::I32, :name => 'lastAccessTime'},
+    RETENTION => {:type => ::Thrift::Types::I32, :name => 'retention'},
+    SD => {:type => ::Thrift::Types::STRUCT, :name => 'sd', :class => ::StorageDescriptor},
+    PARTITIONKEYS => {:type => ::Thrift::Types::LIST, :name => 'partitionKeys', :element => {:type => ::Thrift::Types::STRUCT, :class => ::FieldSchema}},
+    PARAMETERS => {:type => ::Thrift::Types::MAP, :name => 'parameters', :key => {:type => ::Thrift::Types::STRING}, :value => {:type => ::Thrift::Types::STRING}},
+    VIEWORIGINALTEXT => {:type => ::Thrift::Types::STRING, :name => 'viewOriginalText'},
+    VIEWEXPANDEDTEXT => {:type => ::Thrift::Types::STRING, :name => 'viewExpandedText'},
+    TABLETYPE => {:type => ::Thrift::Types::STRING, :name => 'tableType'},
+    PRIVILEGES => {:type => ::Thrift::Types::STRUCT, :name => 'privileges', :class => ::PrincipalPrivilegeSet, :optional => true},
+    TEMPORARY => {:type => ::Thrift::Types::BOOL, :name => 'temporary', :default => false, :optional => true},
+    REWRITEENABLED => {:type => ::Thrift::Types::BOOL, :name => 'rewriteEnabled', :optional => true},
+    CREATIONMETADATA => {:type => ::Thrift::Types::STRUCT, :name => 'creationMetadata', :class => ::CreationMetadata, :optional => true},
+    CATNAME => {:type => ::Thrift::Types::STRING, :name => 'catName', :optional => true},
+    OWNERTYPE => {:type => ::Thrift::Types::I32, :name => 'ownerType', :default =>     1, :optional => true, :enum_class => ::PrincipalType},
+    WRITEID => {:type => ::Thrift::Types::I64, :name => 'writeId', :default => -1, :optional => true},
+    ISSTATSCOMPLIANT => {:type => ::Thrift::Types::BOOL, :name => 'isStatsCompliant', :optional => true},
+    COLSTATS => {:type => ::Thrift::Types::STRUCT, :name => 'colStats', :class => ::ColumnStatistics, :optional => true},
+    ACCESSTYPE => {:type => ::Thrift::Types::BYTE, :name => 'accessType', :optional => true},
+    REQUIREDREADCAPABILITIES => {:type => ::Thrift::Types::LIST, :name => 'requiredReadCapabilities', :element => {:type => ::Thrift::Types::STRING}, :optional => true},
+    REQUIREDWRITECAPABILITIES => {:type => ::Thrift::Types::LIST, :name => 'requiredWriteCapabilities', :element => {:type => ::Thrift::Types::STRING}, :optional => true}
+  }
+
+  def struct_fields; FIELDS; end
+
+  def validate
+    unless @ownerType.nil? || ::PrincipalType::VALID_VALUES.include?(@ownerType)
+      raise ::Thrift::ProtocolException.new(::Thrift::ProtocolException::UNKNOWN, 'Invalid value of field ownerType!')
+    end
+  end
+
+  ::Thrift::Struct.generate_accessors self
+end
+
+class Partition
+  include ::Thrift::Struct, ::Thrift::Struct_Union
+  VALUES = 1
+  DBNAME = 2
+  TABLENAME = 3
+  CREATETIME = 4
+  LASTACCESSTIME = 5
+  SD = 6
+  PARAMETERS = 7
+  PRIVILEGES = 8
+  CATNAME = 9
+  WRITEID = 10
+  ISSTATSCOMPLIANT = 11
+  COLSTATS = 12
+
+  FIELDS = {
+    VALUES => {:type => ::Thrift::Types::LIST, :name => 'values', :element => {:type => ::Thrift::Types::STRING}},
+    DBNAME => {:type => ::Thrift::Types::STRING, :name => 'dbName'},
+    TABLENAME => {:type => ::Thrift::Types::STRING, :name => 'tableName'},
+    CREATETIME => {:type => ::Thrift::Types::I32, :name => 'createTime'},
+    LASTACCESSTIME => {:type => ::Thrift::Types::I32, :name => 'lastAccessTime'},
+    SD => {:type => ::Thrift::Types::STRUCT, :name => 'sd', :class => ::StorageDescriptor},
+    PARAMETERS => {:type => ::Thrift::Types::MAP, :name => 'parameters', :key => {:type => ::Thrift::Types::STRING}, :value => {:type => ::Thrift::Types::STRING}},
+    PRIVILEGES => {:type => ::Thrift::Types::STRUCT, :name => 'privileges', :class => ::PrincipalPrivilegeSet, :optional => true},
+    CATNAME => {:type => ::Thrift::Types::STRING, :name => 'catName', :optional => true},
+    WRITEID => {:type => ::Thrift::Types::I64, :name => 'writeId', :default => -1, :optional => true},
+    ISSTATSCOMPLIANT => {:type => ::Thrift::Types::BOOL, :name => 'isStatsCompliant', :optional => true},
+    COLSTATS => {:type => ::Thrift::Types::STRUCT, :name => 'colStats', :class => ::ColumnStatistics, :optional => true}
+  }
+
+  def struct_fields; FIELDS; end
+
+  def validate
+  end
+
+  ::Thrift::Struct.generate_accessors self
+end
+
+class PartitionWithoutSD
+  include ::Thrift::Struct, ::Thrift::Struct_Union
+  VALUES = 1
+  CREATETIME = 2
+  LASTACCESSTIME = 3
+  RELATIVEPATH = 4
+  PARAMETERS = 5
+  PRIVILEGES = 6
+
+  FIELDS = {
+    VALUES => {:type => ::Thrift::Types::LIST, :name => 'values', :element => {:type => ::Thrift::Types::STRING}},
+    CREATETIME => {:type => ::Thrift::Types::I32, :name => 'createTime'},
+    LASTACCESSTIME => {:type => ::Thrift::Types::I32, :name => 'lastAccessTime'},
+    RELATIVEPATH => {:type => ::Thrift::Types::STRING, :name => 'relativePath'},
+    PARAMETERS => {:type => ::Thrift::Types::MAP, :name => 'parameters', :key => {:type => ::Thrift::Types::STRING}, :value => {:type => ::Thrift::Types::STRING}},
+    PRIVILEGES => {:type => ::Thrift::Types::STRUCT, :name => 'privileges', :class => ::PrincipalPrivilegeSet, :optional => true}
+  }
+
+  def struct_fields; FIELDS; end
+
+  def validate
+  end
+
+  ::Thrift::Struct.generate_accessors self
+end
+
+class PartitionSpecWithSharedSD
+  include ::Thrift::Struct, ::Thrift::Struct_Union
+  PARTITIONS = 1
+  SD = 2
+
+  FIELDS = {
+    PARTITIONS => {:type => ::Thrift::Types::LIST, :name => 'partitions', :element => {:type => ::Thrift::Types::STRUCT, :class => ::PartitionWithoutSD}},
+    SD => {:type => ::Thrift::Types::STRUCT, :name => 'sd', :class => ::StorageDescriptor}
+  }
+
+  def struct_fields; FIELDS; end
+
+  def validate
+  end
+
+  ::Thrift::Struct.generate_accessors self
+end
+
+class PartitionListComposingSpec
+  include ::Thrift::Struct, ::Thrift::Struct_Union
+  PARTITIONS = 1
+
+  FIELDS = {
+    PARTITIONS => {:type => ::Thrift::Types::LIST, :name => 'partitions', :element => {:type => ::Thrift::Types::STRUCT, :class => ::Partition}}
+  }
+
+  def struct_fields; FIELDS; end
+
+  def validate
+  end
+
+  ::Thrift::Struct.generate_accessors self
+end
+
+class PartitionSpec
+  include ::Thrift::Struct, ::Thrift::Struct_Union
+  DBNAME = 1
+  TABLENAME = 2
+  ROOTPATH = 3
+  SHAREDSDPARTITIONSPEC = 4
+  PARTITIONLIST = 5
+  CATNAME = 6
+  WRITEID = 7
+  ISSTATSCOMPLIANT = 8
+
+  FIELDS = {
+    DBNAME => {:type => ::Thrift::Types::STRING, :name => 'dbName'},
+    TABLENAME => {:type => ::Thrift::Types::STRING, :name => 'tableName'},
+    ROOTPATH => {:type => ::Thrift::Types::STRING, :name => 'rootPath'},
+    SHAREDSDPARTITIONSPEC => {:type => ::Thrift::Types::STRUCT, :name => 'sharedSDPartitionSpec', :class => ::PartitionSpecWithSharedSD, :optional => true},
+    PARTITIONLIST => {:type => ::Thrift::Types::STRUCT, :name => 'partitionList', :class => ::PartitionListComposingSpec, :optional => true},
+    CATNAME => {:type => ::Thrift::Types::STRING, :name => 'catName', :optional => true},
+    WRITEID => {:type => ::Thrift::Types::I64, :name => 'writeId', :default => -1, :optional => true},
+    ISSTATSCOMPLIANT => {:type => ::Thrift::Types::BOOL, :name => 'isStatsCompliant', :optional => true}
+  }
+
+  def struct_fields; FIELDS; end
+
+  def validate
   end
 
   ::Thrift::Struct.generate_accessors self
@@ -2453,12 +2467,16 @@ class GetPartitionsByNamesRequest
   TBL_NAME = 2
   NAMES = 3
   GET_COL_STATS = 4
+  PROCESSORCAPABILITIES = 5
+  PROCESSORIDENTIFIER = 6
 
   FIELDS = {
     DB_NAME => {:type => ::Thrift::Types::STRING, :name => 'db_name'},
     TBL_NAME => {:type => ::Thrift::Types::STRING, :name => 'tbl_name'},
     NAMES => {:type => ::Thrift::Types::LIST, :name => 'names', :element => {:type => ::Thrift::Types::STRING}, :optional => true},
-    GET_COL_STATS => {:type => ::Thrift::Types::BOOL, :name => 'get_col_stats', :optional => true}
+    GET_COL_STATS => {:type => ::Thrift::Types::BOOL, :name => 'get_col_stats', :optional => true},
+    PROCESSORCAPABILITIES => {:type => ::Thrift::Types::LIST, :name => 'processorCapabilities', :element => {:type => ::Thrift::Types::STRING}, :optional => true},
+    PROCESSORIDENTIFIER => {:type => ::Thrift::Types::STRING, :name => 'processorIdentifier', :optional => true}
   }
 
   def struct_fields; FIELDS; end
@@ -3987,6 +4005,8 @@ class GetTableRequest
   CATNAME = 4
   VALIDWRITEIDLIST = 6
   GETCOLUMNSTATS = 7
+  PROCESSORCAPABILITIES = 8
+  PROCESSORIDENTIFIER = 9
 
   FIELDS = {
     DBNAME => {:type => ::Thrift::Types::STRING, :name => 'dbName'},
@@ -3994,7 +4014,9 @@ class GetTableRequest
     CAPABILITIES => {:type => ::Thrift::Types::STRUCT, :name => 'capabilities', :class => ::ClientCapabilities, :optional => true},
     CATNAME => {:type => ::Thrift::Types::STRING, :name => 'catName', :optional => true},
     VALIDWRITEIDLIST => {:type => ::Thrift::Types::STRING, :name => 'validWriteIdList', :optional => true},
-    GETCOLUMNSTATS => {:type => ::Thrift::Types::BOOL, :name => 'getColumnStats', :optional => true}
+    GETCOLUMNSTATS => {:type => ::Thrift::Types::BOOL, :name => 'getColumnStats', :optional => true},
+    PROCESSORCAPABILITIES => {:type => ::Thrift::Types::LIST, :name => 'processorCapabilities', :element => {:type => ::Thrift::Types::STRING}, :optional => true},
+    PROCESSORIDENTIFIER => {:type => ::Thrift::Types::STRING, :name => 'processorIdentifier', :optional => true}
   }
 
   def struct_fields; FIELDS; end
@@ -4032,12 +4054,16 @@ class GetTablesRequest
   TBLNAMES = 2
   CAPABILITIES = 3
   CATNAME = 4
+  PROCESSORCAPABILITIES = 5
+  PROCESSORIDENTIFIER = 6
 
   FIELDS = {
     DBNAME => {:type => ::Thrift::Types::STRING, :name => 'dbName'},
     TBLNAMES => {:type => ::Thrift::Types::LIST, :name => 'tblNames', :element => {:type => ::Thrift::Types::STRING}, :optional => true},
     CAPABILITIES => {:type => ::Thrift::Types::STRUCT, :name => 'capabilities', :class => ::ClientCapabilities, :optional => true},
-    CATNAME => {:type => ::Thrift::Types::STRING, :name => 'catName', :optional => true}
+    CATNAME => {:type => ::Thrift::Types::STRING, :name => 'catName', :optional => true},
+    PROCESSORCAPABILITIES => {:type => ::Thrift::Types::LIST, :name => 'processorCapabilities', :element => {:type => ::Thrift::Types::STRING}, :optional => true},
+    PROCESSORIDENTIFIER => {:type => ::Thrift::Types::STRING, :name => 'processorIdentifier', :optional => true}
   }
 
   def struct_fields; FIELDS; end
@@ -4061,6 +4087,83 @@ class GetTablesResult
 
   def validate
     raise ::Thrift::ProtocolException.new(::Thrift::ProtocolException::UNKNOWN, 'Required field tables is unset!') unless @tables
+  end
+
+  ::Thrift::Struct.generate_accessors self
+end
+
+class GetTablesExtRequest
+  include ::Thrift::Struct, ::Thrift::Struct_Union
+  CATALOG = 1
+  DATABASE = 2
+  TABLENAMEPATTERN = 3
+  REQUESTEDFIELDS = 4
+  LIMIT = 5
+  PROCESSORCAPABILITIES = 6
+  PROCESSORIDENTIFIER = 7
+
+  FIELDS = {
+    CATALOG => {:type => ::Thrift::Types::STRING, :name => 'catalog'},
+    DATABASE => {:type => ::Thrift::Types::STRING, :name => 'database'},
+    TABLENAMEPATTERN => {:type => ::Thrift::Types::STRING, :name => 'tableNamePattern'},
+    REQUESTEDFIELDS => {:type => ::Thrift::Types::I32, :name => 'requestedFields'},
+    LIMIT => {:type => ::Thrift::Types::I32, :name => 'limit', :optional => true},
+    PROCESSORCAPABILITIES => {:type => ::Thrift::Types::LIST, :name => 'processorCapabilities', :element => {:type => ::Thrift::Types::STRING}, :optional => true},
+    PROCESSORIDENTIFIER => {:type => ::Thrift::Types::STRING, :name => 'processorIdentifier', :optional => true}
+  }
+
+  def struct_fields; FIELDS; end
+
+  def validate
+    raise ::Thrift::ProtocolException.new(::Thrift::ProtocolException::UNKNOWN, 'Required field catalog is unset!') unless @catalog
+    raise ::Thrift::ProtocolException.new(::Thrift::ProtocolException::UNKNOWN, 'Required field database is unset!') unless @database
+    raise ::Thrift::ProtocolException.new(::Thrift::ProtocolException::UNKNOWN, 'Required field tableNamePattern is unset!') unless @tableNamePattern
+    raise ::Thrift::ProtocolException.new(::Thrift::ProtocolException::UNKNOWN, 'Required field requestedFields is unset!') unless @requestedFields
+  end
+
+  ::Thrift::Struct.generate_accessors self
+end
+
+class ExtendedTableInfo
+  include ::Thrift::Struct, ::Thrift::Struct_Union
+  TBLNAME = 1
+  ACCESSTYPE = 2
+  REQUIREDREADCAPABILITIES = 3
+  REQUIREDWRITECAPABILITIES = 4
+
+  FIELDS = {
+    TBLNAME => {:type => ::Thrift::Types::STRING, :name => 'tblName'},
+    ACCESSTYPE => {:type => ::Thrift::Types::I32, :name => 'accessType', :optional => true},
+    REQUIREDREADCAPABILITIES => {:type => ::Thrift::Types::LIST, :name => 'requiredReadCapabilities', :element => {:type => ::Thrift::Types::STRING}, :optional => true},
+    REQUIREDWRITECAPABILITIES => {:type => ::Thrift::Types::LIST, :name => 'requiredWriteCapabilities', :element => {:type => ::Thrift::Types::STRING}, :optional => true}
+  }
+
+  def struct_fields; FIELDS; end
+
+  def validate
+    raise ::Thrift::ProtocolException.new(::Thrift::ProtocolException::UNKNOWN, 'Required field tblName is unset!') unless @tblName
+  end
+
+  ::Thrift::Struct.generate_accessors self
+end
+
+class GetDatabaseRequest
+  include ::Thrift::Struct, ::Thrift::Struct_Union
+  NAME = 1
+  CATALOGNAME = 2
+  PROCESSORCAPABILITIES = 3
+  PROCESSORIDENTIFIER = 4
+
+  FIELDS = {
+    NAME => {:type => ::Thrift::Types::STRING, :name => 'name', :optional => true},
+    CATALOGNAME => {:type => ::Thrift::Types::STRING, :name => 'catalogName', :optional => true},
+    PROCESSORCAPABILITIES => {:type => ::Thrift::Types::LIST, :name => 'processorCapabilities', :element => {:type => ::Thrift::Types::STRING}, :optional => true},
+    PROCESSORIDENTIFIER => {:type => ::Thrift::Types::STRING, :name => 'processorIdentifier', :optional => true}
+  }
+
+  def struct_fields; FIELDS; end
+
+  def validate
   end
 
   ::Thrift::Struct.generate_accessors self
@@ -5172,6 +5275,41 @@ class GetRuntimeStatsRequest
   def validate
     raise ::Thrift::ProtocolException.new(::Thrift::ProtocolException::UNKNOWN, 'Required field maxWeight is unset!') unless @maxWeight
     raise ::Thrift::ProtocolException.new(::Thrift::ProtocolException::UNKNOWN, 'Required field maxCreateTime is unset!') unless @maxCreateTime
+  end
+
+  ::Thrift::Struct.generate_accessors self
+end
+
+class CreateTableRequest
+  include ::Thrift::Struct, ::Thrift::Struct_Union
+  TABLE = 1
+  ENVCONTEXT = 2
+  PRIMARYKEYS = 3
+  FOREIGNKEYS = 4
+  UNIQUECONSTRAINTS = 5
+  NOTNULLCONSTRAINTS = 6
+  DEFAULTCONSTRAINTS = 7
+  CHECKCONSTRAINTS = 8
+  PROCESSORCAPABILITIES = 9
+  PROCESSORIDENTIFIER = 10
+
+  FIELDS = {
+    TABLE => {:type => ::Thrift::Types::STRUCT, :name => 'table', :class => ::Table},
+    ENVCONTEXT => {:type => ::Thrift::Types::STRUCT, :name => 'envContext', :class => ::EnvironmentContext, :optional => true},
+    PRIMARYKEYS => {:type => ::Thrift::Types::LIST, :name => 'primaryKeys', :element => {:type => ::Thrift::Types::STRUCT, :class => ::SQLPrimaryKey}, :optional => true},
+    FOREIGNKEYS => {:type => ::Thrift::Types::LIST, :name => 'foreignKeys', :element => {:type => ::Thrift::Types::STRUCT, :class => ::SQLForeignKey}, :optional => true},
+    UNIQUECONSTRAINTS => {:type => ::Thrift::Types::LIST, :name => 'uniqueConstraints', :element => {:type => ::Thrift::Types::STRUCT, :class => ::SQLUniqueConstraint}, :optional => true},
+    NOTNULLCONSTRAINTS => {:type => ::Thrift::Types::LIST, :name => 'notNullConstraints', :element => {:type => ::Thrift::Types::STRUCT, :class => ::SQLNotNullConstraint}, :optional => true},
+    DEFAULTCONSTRAINTS => {:type => ::Thrift::Types::LIST, :name => 'defaultConstraints', :element => {:type => ::Thrift::Types::STRUCT, :class => ::SQLDefaultConstraint}, :optional => true},
+    CHECKCONSTRAINTS => {:type => ::Thrift::Types::LIST, :name => 'checkConstraints', :element => {:type => ::Thrift::Types::STRUCT, :class => ::SQLCheckConstraint}, :optional => true},
+    PROCESSORCAPABILITIES => {:type => ::Thrift::Types::LIST, :name => 'processorCapabilities', :element => {:type => ::Thrift::Types::STRING}, :optional => true},
+    PROCESSORIDENTIFIER => {:type => ::Thrift::Types::STRING, :name => 'processorIdentifier', :optional => true}
+  }
+
+  def struct_fields; FIELDS; end
+
+  def validate
+    raise ::Thrift::ProtocolException.new(::Thrift::ProtocolException::UNKNOWN, 'Required field table is unset!') unless @table
   end
 
   ::Thrift::Struct.generate_accessors self

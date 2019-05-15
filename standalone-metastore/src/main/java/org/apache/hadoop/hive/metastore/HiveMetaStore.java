@@ -32,6 +32,9 @@ import static org.apache.hadoop.hive.metastore.utils.MetaStoreUtils.prependNotNu
 
 import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
@@ -273,6 +276,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
     private FileMetadataManager fileMetadataManager;
     private PartitionExpressionProxy expressionProxy;
     private StorageSchemaReader storageSchemaReader;
+    private IMetaStoreMetadataTransformer transformer;
 
     // Variables for metrics
     // Package visible so that HMSMetricsListener can see them.
@@ -618,6 +622,27 @@ public class HiveMetaStore extends ThriftHiveMetastore {
       }
       expressionProxy = PartFilterExprUtil.createExpressionProxy(conf);
       fileMetadataManager = new FileMetadataManager(this.getMS(), conf);
+
+      String className = MetastoreConf.getVar(conf, MetastoreConf.ConfVars.METASTORE_METADATA_TRANSFORMER_CLASS);
+      if (className != null && !className.trim().isEmpty()) {
+        Class<?> clazz;
+        try {
+          clazz = conf.getClassByName(className);
+        } catch (ClassNotFoundException e) {
+          LOG.error("Unable to load class " + className, e);
+          throw new IllegalArgumentException(e);
+        }
+        Constructor<?> constructor;
+        try {
+          constructor = clazz.getConstructor(IHMSHandler.class);
+          if (Modifier.isPrivate(constructor.getModifiers()))
+            throw new IllegalArgumentException("Illegal implementation for metadata transformer. Constructor is private");
+          transformer = (IMetaStoreMetadataTransformer) constructor.newInstance(this);
+        } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+          LOG.error("Unable to create instance of class " + className, e);
+          throw new IllegalArgumentException(e);
+        }
+      }
     }
 
     private static String addPrefix(String s) {
@@ -1461,21 +1486,14 @@ public class HiveMetaStore extends ThriftHiveMetastore {
     }
 
     @Override
-    public Database get_database(final String name) throws NoSuchObjectException, MetaException {
-      startFunction("get_database", ": " + name);
-      Database db = null;
-      Exception ex = null;
-      try {
-        String[] parsedDbName = parseDbName(name, conf);
-        db = get_database_core(parsedDbName[CAT_NAME], parsedDbName[DB_NAME]);
-        firePreEvent(new PreReadDatabaseEvent(db, this));
-      } catch (MetaException|NoSuchObjectException e) {
-        ex = e;
-        throw e;
-      } finally {
-        endFunction("get_database", db != null, ex);
-      }
-      return db;
+    public Database get_database(final String name)
+        throws NoSuchObjectException, MetaException {
+      GetDatabaseRequest request = new GetDatabaseRequest();
+      String[] parsedDbName = parseDbName(name, conf);
+      request.setName(parsedDbName[DB_NAME]);
+      if (parsedDbName[CAT_NAME] != null)
+          request.setCatalogName(parsedDbName[CAT_NAME]);
+        return get_database_req(request);
     }
 
     @Override
@@ -1491,6 +1509,34 @@ public class HiveMetaStore extends ThriftHiveMetastore {
       } catch (Exception e) {
         assert (e instanceof RuntimeException);
         throw (RuntimeException) e;
+      }
+      return db;
+    }
+
+    @Override
+    public Database get_database_req(GetDatabaseRequest request) throws NoSuchObjectException, MetaException {
+      startFunction("get_database", ": " + request.getName());
+      Database db = null;
+      Exception ex = null;
+      if (request.getName() == null) {
+        throw new MetaException("Database name cannot be null.");
+      }
+      List<String> processorCapabilities = request.getProcessorCapabilities();
+      String processorId = request.getProcessorIdentifier();
+      try {
+        db = getMS().getDatabase(request.getCatalogName(), request.getName());
+        firePreEvent(new PreReadDatabaseEvent(db, this));
+        if (processorCapabilities != null && transformer != null) {
+          db = transformer.transformDatabase(db, processorCapabilities, processorId);
+        }
+      } catch (MetaException | NoSuchObjectException e) {
+        ex = e;
+        throw e;
+      } catch (Exception e) {
+        assert (e instanceof RuntimeException);
+        throw (RuntimeException) e;
+      } finally {
+        endFunction("get_database", db != null, ex);
       }
       return db;
     }
@@ -1940,18 +1986,60 @@ public class HiveMetaStore extends ThriftHiveMetastore {
         final EnvironmentContext envContext)
             throws AlreadyExistsException, MetaException,
             InvalidObjectException, NoSuchObjectException, InvalidInputException {
-      create_table_core(ms, tbl, envContext, null, null, null, null, null, null);
+      CreateTableRequest req = new CreateTableRequest(tbl);
+      req.setEnvContext(envContext);
+      create_table_core(ms, req);
     }
 
     private void create_table_core(final RawStore ms, final Table tbl,
         final EnvironmentContext envContext, List<SQLPrimaryKey> primaryKeys,
         List<SQLForeignKey> foreignKeys, List<SQLUniqueConstraint> uniqueConstraints,
         List<SQLNotNullConstraint> notNullConstraints, List<SQLDefaultConstraint> defaultConstraints,
-                                   List<SQLCheckConstraint> checkConstraints)
+                                   List<SQLCheckConstraint> checkConstraints,
+                                   List<String> processorCapabilities, String processorIdentifier)
         throws AlreadyExistsException, MetaException,
         InvalidObjectException, NoSuchObjectException, InvalidInputException {
+      CreateTableRequest req = new CreateTableRequest(tbl);
+      if (envContext != null)
+        req.setEnvContext(envContext);
+      if (primaryKeys != null)
+        req.setPrimaryKeys(primaryKeys);
+      if (foreignKeys != null)
+        req.setForeignKeys(foreignKeys);
+      if (uniqueConstraints != null)
+        req.setUniqueConstraints(uniqueConstraints);
+      if (notNullConstraints != null)
+        req.setNotNullConstraints(notNullConstraints);
+      if (defaultConstraints != null)
+        req.setDefaultConstraints(defaultConstraints);
+      if (checkConstraints != null)
+        req.setCheckConstraints(checkConstraints);
+      if (processorCapabilities != null) {
+        req.setProcessorCapabilities(processorCapabilities);
+        req.setProcessorIdentifier(processorIdentifier);
+      }
+      create_table_core(ms, req);
+    }
 
+    private void create_table_core(final RawStore ms, final CreateTableRequest req)
+        throws AlreadyExistsException, MetaException,
+              InvalidObjectException, NoSuchObjectException, InvalidInputException {
       ColumnStatistics colStats = null;
+      Table tbl = req.getTable();
+      EnvironmentContext envContext = req.getEnvContext();
+      List<SQLPrimaryKey> primaryKeys = req.getPrimaryKeys();
+      List<SQLForeignKey> foreignKeys = req.getForeignKeys();
+      List<SQLUniqueConstraint> uniqueConstraints = req.getUniqueConstraints();
+      List<SQLNotNullConstraint> notNullConstraints = req.getNotNullConstraints();
+      List<SQLDefaultConstraint> defaultConstraints = req.getDefaultConstraints();
+      List<SQLCheckConstraint> checkConstraints = req.getCheckConstraints();
+      List<String> processorCapabilities = req.getProcessorCapabilities();
+      String processorId = req.getProcessorIdentifier();
+
+      if (transformer != null && !isInTest) {
+        tbl = transformer.transformCreateTable(tbl, processorCapabilities, processorId);
+      }
+
       // If the given table has column statistics, save it here. We will update it later.
       // We don't want it to be part of the Table object being created, lest the create table
       // event will also have the col stats which we don't want.
@@ -2243,6 +2331,32 @@ public class HiveMetaStore extends ThriftHiveMetastore {
     }
 
     @Override
+    public void create_table_req(final CreateTableRequest req)
+            throws AlreadyExistsException, MetaException, InvalidObjectException,
+            InvalidInputException {
+      Table tbl = req.getTable();
+      startFunction("create_table_req", ": " + tbl.toString());
+      boolean success = false;
+      Exception ex = null;
+      try {
+        create_table_core(getMS(), req);
+        success = true;
+      } catch (NoSuchObjectException e) {
+        LOG.warn("create_table_req got ", e);
+        ex = e;
+        throw new InvalidObjectException(e.getMessage());
+      } catch (MetaException | InvalidObjectException | AlreadyExistsException | InvalidInputException e) {
+        ex = e;
+        throw e;
+      } catch (Exception e) {
+        ex = e;
+        throw newMetaException(e);
+      } finally {
+        endFunction("create_table_req", success, ex, tbl.getTableName());
+      }
+    }
+
+    @Override
     public void create_table_with_constraints(final Table tbl,
         final List<SQLPrimaryKey> primaryKeys, final List<SQLForeignKey> foreignKeys,
         List<SQLUniqueConstraint> uniqueConstraints,
@@ -2255,27 +2369,24 @@ public class HiveMetaStore extends ThriftHiveMetastore {
       boolean success = false;
       Exception ex = null;
       try {
-        create_table_core(getMS(), tbl, null, primaryKeys, foreignKeys,
-            uniqueConstraints, notNullConstraints, defaultConstraints, checkConstraints);
+        CreateTableRequest req = new CreateTableRequest(tbl);
+        req.setPrimaryKeys(primaryKeys);
+        req.setForeignKeys(foreignKeys);
+        req.setUniqueConstraints(uniqueConstraints);
+        req.setNotNullConstraints(notNullConstraints);
+        req.setDefaultConstraints(defaultConstraints);
+        req.setCheckConstraints(checkConstraints);
+        create_table_req(req);
         success = true;
-      } catch (NoSuchObjectException e) {
+      } catch (MetaException | InvalidObjectException | AlreadyExistsException |
+              InvalidInputException e) {
         ex = e;
-        throw new InvalidObjectException(e.getMessage());
+        throw e;
       } catch (Exception e) {
         ex = e;
-        if (e instanceof MetaException) {
-          throw (MetaException) e;
-        } else if (e instanceof InvalidObjectException) {
-          throw (InvalidObjectException) e;
-        } else if (e instanceof AlreadyExistsException) {
-          throw (AlreadyExistsException) e;
-        } else if (e instanceof  InvalidInputException) {
-          throw (InvalidInputException) e;
-        } else {
-          throw newMetaException(e);
-        }
+        throw newMetaException(e);
       } finally {
-        endFunction("create_table", success, ex, tbl.getTableName());
+        endFunction("create_table_with_constraints", success, ex, tbl.getTableName());
       }
     }
 
@@ -3108,15 +3219,89 @@ public class HiveMetaStore extends ThriftHiveMetastore {
     }
 
     @Override
+    public List<ExtendedTableInfo> get_tables_ext(final GetTablesExtRequest req) throws MetaException {
+      List<String> tables = new ArrayList<String>();
+      List<ExtendedTableInfo> ret = new ArrayList<ExtendedTableInfo>();
+      String catalog  = req.getCatalog();
+      String database = req.getDatabase();
+      String pattern  = req.getTableNamePattern();
+      List<String> processorCapabilities = req.getProcessorCapabilities();
+      int limit = req.getLimit();
+      String processorId  = req.getProcessorIdentifier();
+      List<Table> tObjects = new ArrayList<>();
+
+      startTableFunction("get_tables_ext", catalog, database, pattern);
+      Exception ex = null;
+      try {
+        tables = getMS().getTables(catalog, database, pattern, null, limit);
+        LOG.debug("get_tables_ext:getTables() returned " + tables.size());
+
+        if (tables.size() > 0) {
+          tObjects = getMS().getTableObjectsByName(catalog, database, tables);
+          LOG.debug("get_tables_ext:getTableObjectsByName() returned " + tObjects.size());
+          if (processorCapabilities == null || processorCapabilities.size() == 0 ||
+                processorCapabilities.contains("MANAGERAWMETADATA")) {
+            LOG.info("Skipping translation for processor with " + processorId);
+          } else {
+            if (transformer != null) {
+              Map<Table, List<String>> retMap = transformer.transform(tObjects, processorCapabilities, processorId);
+
+              for (Map.Entry<Table, List<String>> entry : retMap.entrySet())  {
+                LOG.debug("Table " + entry.getKey().getTableName() + " requires " + Arrays.toString((entry.getValue()).toArray()));
+                ret.add(convertTableToExtendedTable(entry.getKey(), entry.getValue(), req.getRequestedFields()));
+              }
+            } else {
+              for (Table table : tObjects) {
+                ret.add(convertTableToExtendedTable(table, processorCapabilities, req.getRequestedFields()));
+              }
+            }
+          }
+        }
+      } catch (MetaException e) {
+        ex = e;
+        throw e;
+      } catch (Exception e) {
+        ex = e;
+        throw newMetaException(e);
+      } finally {
+        endFunction("get_tables_ext", ret != null, ex);
+      }
+      return ret;
+    }
+
+    private ExtendedTableInfo convertTableToExtendedTable (Table table,
+          List<String> processorCapabilities, int mask) {
+      ExtendedTableInfo extTable = new ExtendedTableInfo(table.getTableName());
+      if ((mask & GetTablesExtRequestFields.ACCESS_TYPE.getValue()) == GetTablesExtRequestFields.ACCESS_TYPE.getValue())
+        extTable.setAccessType(table.getAccessType());
+
+      if ((mask & GetTablesExtRequestFields.PROCESSOR_CAPABILITIES.getValue())
+             == GetTablesExtRequestFields.PROCESSOR_CAPABILITIES.getValue()) {
+        extTable.setRequiredReadCapabilities(table.getRequiredReadCapabilities());
+        extTable.setRequiredWriteCapabilities(table.getRequiredWriteCapabilities());
+      }
+
+      return extTable;
+    }
+
+    @Override
     public GetTableResult get_table_req(GetTableRequest req) throws MetaException,
         NoSuchObjectException {
       String catName = req.isSetCatName() ? req.getCatName() : getDefaultCatalog(conf);
       return new GetTableResult(getTableInternal(catName, req.getDbName(), req.getTblName(),
-          req.getCapabilities(), req.getValidWriteIdList(), req.isGetColumnStats()));
+          req.getCapabilities(), req.getValidWriteIdList(), req.isGetColumnStats(),
+          req.getProcessorCapabilities(), req.getProcessorIdentifier()));
     }
 
     private Table getTableInternal(String catName, String dbname, String name,
         ClientCapabilities capabilities, String writeIdList, boolean getColumnStats)
+        throws MetaException, NoSuchObjectException {
+      return getTableInternal(catName, dbname, name, capabilities, writeIdList, getColumnStats, null, null);
+    }
+
+    private Table getTableInternal(String catName, String dbname, String name,
+        ClientCapabilities capabilities, String writeIdList, boolean getColumnStats,
+        List<String> processorCapabilities, String processorId)
         throws MetaException, NoSuchObjectException {
       if (isInTest) {
         assertClientHasCapability(capabilities, ClientCapability.TEST_CAPABILITY,
@@ -3132,6 +3317,23 @@ public class HiveMetaStore extends ThriftHiveMetastore {
           assertClientHasCapability(capabilities, ClientCapability.INSERT_ONLY_TABLES,
               "insert-only tables", "get_table_req");
         }
+
+        if (processorCapabilities == null || processorCapabilities.size() == 0 ||
+              processorCapabilities.contains("MANAGERAWMETADATA")) {
+          LOG.info("Skipping translation for processor with " + processorId);
+        } else {
+          if (transformer != null) {
+            List<Table> tList = new ArrayList<>();
+            tList.add(t);
+            Map<Table, List<String>> ret = transformer.transform(tList, processorCapabilities, processorId);
+            if (ret.size() > 1) {
+              LOG.warn("Unexpected resultset size:" + ret.size());
+              throw new MetaException("Unexpected result from metadata transformer:return list size is " + ret.size());
+            }
+            t = (Table)(ret.keySet().iterator().next());
+          }
+        }
+
         firePreEvent(new PreReadTableEvent(t, this));
       } catch (MetaException | NoSuchObjectException e) {
         ex = e;
@@ -3141,7 +3343,6 @@ public class HiveMetaStore extends ThriftHiveMetastore {
       }
       return t;
     }
-
 
     @Override
     public List<TableMeta> get_table_meta(String dbnames, String tblNames, List<String> tblTypes)
@@ -5421,7 +5622,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
       Exception ex = null;
       String[] parsedDbName = parseDbName(dbname, conf);
       try {
-        ret = getMS().getTables(parsedDbName[CAT_NAME], parsedDbName[DB_NAME], pattern, TableType.valueOf(tableType));
+        ret = getMS().getTables(parsedDbName[CAT_NAME], parsedDbName[DB_NAME], pattern, TableType.valueOf(tableType), -1);
       } catch (Exception e) {
         ex = e;
         if (e instanceof MetaException) {
@@ -6507,12 +6708,19 @@ public class HiveMetaStore extends ThriftHiveMetastore {
             throws TException {
       List<Partition> partitions = get_partitions_by_names(gpbnr.getDb_name(),
               gpbnr.getTbl_name(), gpbnr.getNames(),
-              gpbnr.isSetGet_col_stats() && gpbnr.isGet_col_stats());
+              gpbnr.isSetGet_col_stats() && gpbnr.isGet_col_stats(), gpbnr.getProcessorCapabilities(),
+              gpbnr.getProcessorIdentifier());
       return new GetPartitionsByNamesResult(partitions);
     }
 
     public List<Partition> get_partitions_by_names(final String dbName, final String tblName,
            final List<String> partNames, boolean getColStats) throws TException {
+      return get_partitions_by_names(dbName, tblName, partNames, getColStats, null, null);
+    }
+ 
+    public List<Partition> get_partitions_by_names(final String dbName, final String tblName,
+           final List<String> partNames, boolean getColStats, List<String> processorCapabilities,
+           String processorId) throws TException {
 
       String[] dbNameParts = parseDbName(dbName, conf);
       String parsedCatName = dbNameParts[CAT_NAME];
@@ -6521,16 +6729,17 @@ public class HiveMetaStore extends ThriftHiveMetastore {
               tblName);
       fireReadTablePreEvent(parsedCatName, parsedDbName, tblName);
       List<Partition> ret = null;
+      Table table = null;
       Exception ex = null;
       boolean success = false;
       try {
         getMS().openTransaction();
 
         ret = getMS().getPartitionsByNames(parsedCatName, parsedDbName, tblName, partNames);
+        table = getTable(parsedCatName, parsedDbName, tblName);
 
         // If requested add column statistics in each of the partition objects
         if (getColStats) {
-          Table table = getTable(parsedCatName, parsedDbName, tblName);
           // Since each partition may have stats collected for different set of columns, we
           // request them separately.
           for (Partition part: ret) {
@@ -6548,6 +6757,14 @@ public class HiveMetaStore extends ThriftHiveMetastore {
           }
         }
 
+        if (processorCapabilities == null || processorCapabilities.size() == 0 ||
+              processorCapabilities.contains("MANAGERAWMETADATA")) {
+          LOG.info("Skipping translation for processor with " + processorId);
+        } else {
+          if (transformer != null) {
+            ret = transformer.transformPartitions(ret, table, processorCapabilities, processorId);
+          }
+        }
         success = getMS().commitTransaction();
       } catch (Exception e) {
         ex = e;

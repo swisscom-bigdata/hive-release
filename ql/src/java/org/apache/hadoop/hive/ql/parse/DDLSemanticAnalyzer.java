@@ -1470,7 +1470,8 @@ public class DDLSemanticAnalyzer extends BaseSemanticAnalyzer {
     Table table = getTable(tableName, true);
     boolean isForce = ast.getFirstChildWithType(HiveParser.TOK_FORCE) != null;
     if (!isForce) {
-      if (table.getTableType() != TableType.MANAGED_TABLE) {
+      if (table.getTableType() != TableType.MANAGED_TABLE &&
+          (table.getParameters().getOrDefault("external.table.purge", "FALSE")).equalsIgnoreCase("FALSE")) {
         throw new SemanticException(ErrorMsg.TRUNCATE_FOR_NON_MANAGED_TABLE.format(tableName));
       }
     }
