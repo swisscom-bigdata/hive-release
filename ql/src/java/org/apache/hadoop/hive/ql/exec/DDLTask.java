@@ -4872,6 +4872,8 @@ public class DDLTask extends Task<DDLWork> implements Serializable {
         }
       }
 
+      setUserSpecifiedLocation(tbl, crtTbl);
+
       tbl.setFields(oldtbl.getCols());
       tbl.setPartCols(oldtbl.getPartCols());
 
@@ -4913,11 +4915,7 @@ public class DDLTask extends Task<DDLWork> implements Serializable {
       // using old table object, hence reset the owner to current user for new table.
       tbl.setOwner(SessionState.getUserFromAuthenticator());
 
-      if (crtTbl.getLocation() != null) {
-        tbl.setDataLocation(new Path(crtTbl.getLocation()));
-      } else {
-        tbl.unsetDataLocation();
-      }
+     setUserSpecifiedLocation(tbl, crtTbl);
 
       Class<? extends Deserializer> serdeClass = oldtbl.getDeserializerClass();
 
@@ -4991,6 +4989,14 @@ public class DDLTask extends Task<DDLWork> implements Serializable {
     db.createTable(tbl, crtTbl.getIfNotExists());
     addIfAbsentByName(new WriteEntity(tbl, WriteEntity.WriteType.DDL_NO_LOCK));
     return 0;
+  }
+
+  private void setUserSpecifiedLocation(Table table, CreateTableLikeDesc crtTbl) {
+    if (crtTbl.getLocation() != null) {
+      table.setDataLocation(new Path(crtTbl.getLocation()));
+    } else {
+      table.unsetDataLocation();
+    }
   }
 
   /**
