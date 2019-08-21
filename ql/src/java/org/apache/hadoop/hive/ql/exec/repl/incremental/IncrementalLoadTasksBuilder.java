@@ -149,18 +149,6 @@ public class IncrementalLoadTasksBuilder {
     }
 
     if (!hasMoreWork()) {
-      // if no events were replayed, then add a task to update the last repl id of the database/table to last event id.
-      if (taskChainTail == evTaskRoot) {
-        String lastEventid = eventTo.toString();
-        if (StringUtils.isEmpty(tableName)) {
-          taskChainTail = dbUpdateReplStateTask(dbName, lastEventid, taskChainTail);
-          this.log.debug("no events to replay, set last repl id of db  " + dbName + " to " + lastEventid);
-        } else {
-          taskChainTail = tableUpdateReplStateTask(dbName, tableName, null, lastEventid, taskChainTail);
-          this.log.debug("no events to replay, set last repl id of table " + dbName + "." + tableName + " to " +
-                  lastEventid);
-        }
-      }
       Map<String, String> dbProps = new HashMap<>();
       dbProps.put(ReplicationSpec.KEY.CURR_STATE_ID.toString(), String.valueOf(lastReplayedEvent));
       ReplStateLogWork replStateLogWork = new ReplStateLogWork(replLogger, dbProps);

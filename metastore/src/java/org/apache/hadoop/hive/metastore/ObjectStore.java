@@ -172,6 +172,7 @@ import org.datanucleus.store.scostore.Store;
 import org.datanucleus.util.WeakValueMap;
 
 import com.google.common.collect.Lists;
+import org.apache.commons.collections.CollectionUtils;
 
 /**
  * This class is the interface between the application logic and the database
@@ -7571,9 +7572,27 @@ public class ObjectStore implements RawStore, Configurable {
       int max_events = HiveConf.getIntVar(getConf(), HiveConf.ConfVars.METASTORE_CLEAN_MAX_EVENTS);
       max_events = max_events > 0 ? max_events : Integer.MAX_VALUE;
       query.setRange(0, max_events);
-
-      Collection<MNotificationLog> toBeRemoved = (Collection)query.execute(tooOld);
-      if (toBeRemoved != null && toBeRemoved.size() > 0) {
+      query.setOrdering("eventId ascending");
+      List<MNotificationLog> toBeRemoved = (List) query.execute(tooOld);
+      if (toBeRemoved == null || toBeRemoved.size() == 0) {
+        LOG.info("No events found to be cleaned with eventTime < " + tooOld);
+      } else {
+        NotificationEvent firstEvent = translateDbToThrift(toBeRemoved.get(0));
+        long minEventId = firstEvent.getEventId();
+        long minEventTime = firstEvent.getEventTime();
+        long maxEventId = minEventId;
+        long maxEventTime = minEventTime;
+        if (toBeRemoved.size() > 1) {
+          NotificationEvent lastEvent =
+                  translateDbToThrift(toBeRemoved.get(toBeRemoved.size() - 1));
+          maxEventId = lastEvent.getEventId();
+          maxEventTime = lastEvent.getEventTime();
+        }
+        LOG.info("Cleaned " + toBeRemoved.size() + " events with eventTime < " + tooOld +
+                        " , minimum eventId " + minEventId + " (with eventTime " + minEventTime + " ) " +
+                        "and maximum eventId " + maxEventId + " (with eventTime " + maxEventTime + " )");
+      }
+      if (CollectionUtils.isNotEmpty(toBeRemoved)) {
         pm.deletePersistentAll(toBeRemoved);
       }
       commited = commitTransaction();
