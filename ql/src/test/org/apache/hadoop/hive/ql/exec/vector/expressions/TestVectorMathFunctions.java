@@ -138,6 +138,14 @@ public class TestVectorMathFunctions {
     return batch;
   }
 
+  public static VectorizedRowBatch getVectorizedRowBatchDateInStringOut(int[] intValues) {
+    // get date in timestamp out, and change timestamp out to string out
+    VectorizedRowBatch batch =  getVectorizedRowBatchDateInTimestampOut(intValues);
+    BytesColumnVector outV = new BytesColumnVector(intValues.length);
+    batch.cols[1] = outV;
+    return batch;
+  }
+
   public static VectorizedRowBatch getVectorizedRowBatchDoubleInLongOut() {
     VectorizedRowBatch batch = new VectorizedRowBatch(2);
     LongColumnVector lcv;
