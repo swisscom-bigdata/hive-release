@@ -76,8 +76,13 @@ Stage-0
             SHUFFLE [RS_36]
               Select Operator [SEL_35] (rows=264534 width=384)
                 Output:["_col1","_col2"]
+<<<<<<< HEAD
                 Merge Join Operator [MERGEJOIN_67] (rows=264534 width=280)
                   Conds:RS_32._col1=RS_33._col1(Inner),Output:["_col2","_col6","_col7"]
+=======
+                Merge Join Operator [MERGEJOIN_120] (rows=264534 width=284)
+                  Conds:RS_32._col1=RS_33._col1(Inner),Output:["_col2","_col6"]
+>>>>>>> 25f0fb4643... HIVE-20113: Shuffle avoidance: Disable 1-1 edges for sorted shuffle (Vineet Garg, Gopal V reviewed by Jesus Camacho Rodriguez)
                 <-Reducer 2 [SIMPLE_EDGE]
                   SHUFFLE [RS_32]
                     PartitionCols:_col1

@@ -1761,11 +1761,10 @@ STAGE PLANS:
                           vectorProcessingMode: HASH
                           projectedOutputColumnNums: []
                         Reduce Sink Vectorization:
-                            className: VectorReduceSinkObjectHashOperator
+                            className: VectorReduceSinkMultiKeyOperator
                             keyColumnNums: [0, 1, 2, 3]
                             native: true
                             nativeConditionsMet: hive.vectorized.execution.reducesink.new.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true, No PTF TopN IS true, No DISTINCT columns IS true, BinarySortableSerDe for keys IS true, LazyBinarySerDe for values IS true
-                            partitionColumnNums: [0, 1, 2, 3]
                             valueColumnNums: []
             Execution mode: vectorized, llap
             LLAP IO: may be used (ACID table)
@@ -1791,11 +1790,10 @@ STAGE PLANS:
                       native: true
                       vectorizationSchemaColumns: [0:key:string, 1:value:string, 2:ds:string, 3:hr:string, 4:ROW__ID:struct<writeid:bigint,bucketid:int,rowid:bigint>]
                     Reduce Sink Vectorization:
-                        className: VectorReduceSinkObjectHashOperator
+                        className: VectorReduceSinkMultiKeyOperator
                         keyColumnNums: [2, 3, 0, 1]
                         native: true
                         nativeConditionsMet: hive.vectorized.execution.reducesink.new.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true, No PTF TopN IS true, No DISTINCT columns IS true, BinarySortableSerDe for keys IS true, LazyBinarySerDe for values IS true
-                        partitionColumnNums: [2, 3, 0, 1]
                         valueColumnNums: [4]
             Execution mode: vectorized, llap
             LLAP IO: may be used (ACID table)
@@ -1840,11 +1838,10 @@ STAGE PLANS:
                     vectorProcessingMode: MERGE_PARTIAL
                     projectedOutputColumnNums: []
                   Reduce Sink Vectorization:
-                      className: VectorReduceSinkObjectHashOperator
+                      className: VectorReduceSinkMultiKeyOperator
                       keyColumnNums: [0, 1, 2, 3]
                       native: true
                       nativeConditionsMet: hive.vectorized.execution.reducesink.new.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true, No PTF TopN IS true, No DISTINCT columns IS true, BinarySortableSerDe for keys IS true, LazyBinarySerDe for values IS true
-                      partitionColumnNums: [0, 1, 2, 3]
                       valueColumnNums: []
                   Select Vectorization:
                       className: VectorSelectOperator
@@ -2611,11 +2608,10 @@ STAGE PLANS:
                           vectorProcessingMode: HASH
                           projectedOutputColumnNums: []
                         Reduce Sink Vectorization:
-                            className: VectorReduceSinkObjectHashOperator
+                            className: VectorReduceSinkMultiKeyOperator
                             keyColumnNums: [0, 1, 2, 3]
                             native: true
                             nativeConditionsMet: hive.vectorized.execution.reducesink.new.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true, No PTF TopN IS true, No DISTINCT columns IS true, BinarySortableSerDe for keys IS true, LazyBinarySerDe for values IS true
-                            partitionColumnNums: [0, 1, 2, 3]
                             valueColumnNums: []
             Execution mode: vectorized, llap
             LLAP IO: may be used (ACID table)
@@ -2641,11 +2637,10 @@ STAGE PLANS:
                       native: true
                       vectorizationSchemaColumns: [0:key:string, 1:value:string, 2:ds:string, 3:hr:string, 4:ROW__ID:struct<writeid:bigint,bucketid:int,rowid:bigint>]
                     Reduce Sink Vectorization:
-                        className: VectorReduceSinkObjectHashOperator
+                        className: VectorReduceSinkMultiKeyOperator
                         keyColumnNums: [2, 3, 0, 1]
                         native: true
                         nativeConditionsMet: hive.vectorized.execution.reducesink.new.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true, No PTF TopN IS true, No DISTINCT columns IS true, BinarySortableSerDe for keys IS true, LazyBinarySerDe for values IS true
-                        partitionColumnNums: [2, 3, 0, 1]
                         valueColumnNums: [4]
             Execution mode: vectorized, llap
             LLAP IO: may be used (ACID table)
@@ -2690,11 +2685,10 @@ STAGE PLANS:
                     vectorProcessingMode: MERGE_PARTIAL
                     projectedOutputColumnNums: []
                   Reduce Sink Vectorization:
-                      className: VectorReduceSinkObjectHashOperator
+                      className: VectorReduceSinkMultiKeyOperator
                       keyColumnNums: [0, 1, 2, 3]
                       native: true
                       nativeConditionsMet: hive.vectorized.execution.reducesink.new.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true, No PTF TopN IS true, No DISTINCT columns IS true, BinarySortableSerDe for keys IS true, LazyBinarySerDe for values IS true
-                      partitionColumnNums: [0, 1, 2, 3]
                       valueColumnNums: []
                   Select Vectorization:
                       className: VectorSelectOperator
