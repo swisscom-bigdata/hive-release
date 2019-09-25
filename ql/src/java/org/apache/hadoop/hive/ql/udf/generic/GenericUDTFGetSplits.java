@@ -281,7 +281,7 @@ public class GenericUDTFGetSplits extends GenericUDTF {
     // hive compiler is going to remove inner order by. disable that optimization until then.
     HiveConf.setBoolVar(conf, ConfVars.HIVE_REMOVE_ORDERBY_IN_SUBQUERY, false);
 
-    if(num == 0) {
+    if (schemaSplitOnly) {
       //Schema only
       try {
         List<FieldSchema> fieldSchemas = ParseUtils.parseQueryAndGetSchema(conf, query);

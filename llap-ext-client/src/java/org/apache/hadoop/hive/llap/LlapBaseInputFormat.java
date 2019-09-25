@@ -118,8 +118,6 @@ public class LlapBaseInputFormat<V extends WritableComparable<?>>
   public static final String HANDLE_ID = "llap.if.handleid";
   public static final String DB_KEY = "llap.if.database";
   public static final String USE_NEW_SPLIT_FORMAT = "llap.if.use.new.split.format";
-  public static final String SESSION_QUERIES_FOR_GET_NUM_SPLITS = "llap.session.queries.for.get.num.splits";
-  public static final Pattern SET_QUERY_PATTERN = Pattern.compile("^\\s*set\\s+.*=.+$", Pattern.CASE_INSENSITIVE);
 
   public static final String SPLIT_QUERY = "select get_llap_splits(\"%s\",%d)";
   public static final LlapServiceInstance[] serviceInstanceArray = new LlapServiceInstance[0];
@@ -283,19 +281,6 @@ public class LlapBaseInputFormat<V extends WritableComparable<?>>
       ) {
         if (database != null && !database.isEmpty()) {
           stmt.execute("USE " + database);
-        }
-        String sessionQueries = job.get(SESSION_QUERIES_FOR_GET_NUM_SPLITS);
-        if (sessionQueries != null && !sessionQueries.trim().isEmpty()) {
-          String[] queries = sessionQueries.trim().split(",");
-          for (String q : queries) {
-            //allow only set queries
-            if (SET_QUERY_PATTERN.matcher(q).matches()) {
-              LOG.debug("Executing session query: {}", q);
-              stmt.execute(q);
-            } else {
-              LOG.warn("Only SET queries are allowed, not executing this query: {}", q);
-            }
-          }
         }
 
         // In case of USE_NEW_SPLIT_FORMAT=true, following format is used
