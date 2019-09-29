@@ -62,7 +62,7 @@ public class TestVectorTypeCasts {
     b.cols[0].noNulls = true;
     VectorExpression expr = new CastLongToDouble(0, 1);
     expr.evaluate(b);
-    Assert.assertEquals(2.0, resultV.vector[4]);
+    Assert.assertEquals(2.0, resultV.vector[4], Double.MIN_VALUE);
   }
 
   @Test
@@ -108,8 +108,8 @@ public class TestVectorTypeCasts {
     b.cols[0].noNulls = true;
     VectorExpression expr = new CastDoubleToTimestamp(0, 1);
     expr.evaluate(b);
-    Assert.assertEquals(0.0, TimestampUtils.getDouble(resultV.asScratchTimestamp(3)));
-    Assert.assertEquals(0.5d, TimestampUtils.getDouble(resultV.asScratchTimestamp(4)));
+    Assert.assertEquals(0.0, TimestampUtils.getDouble(resultV.asScratchTimestamp(3)), Double.MIN_VALUE);
+    Assert.assertEquals(0.5d, TimestampUtils.getDouble(resultV.asScratchTimestamp(4)), Double.MIN_VALUE);
   }
 
   @Test
