@@ -4448,13 +4448,8 @@ public class TestVectorStringExpressions {
     Random control = new Random(1234);
     UDFLike udf = new UDFLike();
     for (String pattern : patterns) {
-<<<<<<< HEAD
-      VectorExpression expr = new FilterStringColLikeStringScalar(0, pattern.getBytes("utf-8"));
-      expr.transientInit();
-=======
       VectorExpression expr = new FilterStringColLikeStringScalar(0, pattern.getBytes(StandardCharsets.UTF_8));
       expr.transientInit(hiveConf);
->>>>>>> 5c8392468c... HIVE-22170: from_unixtime and unix_timestamp should use user session time zone (Jesus Camacho Rodriguez, reviewed by Vineet Garg)
       VectorizedRowBatch batch = VectorizedRowGroupGenUtil.getVectorizedRowBatch(1, 1, 1);
       batch.cols[0] = new BytesColumnVector(1);
       BytesColumnVector bcv = (BytesColumnVector) batch.cols[0];
