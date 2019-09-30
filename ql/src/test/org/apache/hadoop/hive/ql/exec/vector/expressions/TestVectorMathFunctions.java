@@ -79,13 +79,13 @@ public class TestVectorMathFunctions {
     DoubleColumnVector resultV = (DoubleColumnVector) b.cols[1];
     b.cols[0].noNulls = true;
     expr.evaluate(b);
-    Assert.assertEquals(-2d, resultV.vector[0], Double.MIN_VALUE);
-    Assert.assertEquals(-1d, resultV.vector[1], Double.MIN_VALUE);
-    Assert.assertEquals(0d, resultV.vector[2], Double.MIN_VALUE);
-    Assert.assertEquals(0d, resultV.vector[3], Double.MIN_VALUE);
-    Assert.assertEquals(1d, resultV.vector[4], Double.MIN_VALUE);
-    Assert.assertEquals(1d, resultV.vector[5], Double.MIN_VALUE);
-    Assert.assertEquals(2d, resultV.vector[6], Double.MIN_VALUE);
+    Assert.assertEquals(-2d, resultV.vector[0]);
+    Assert.assertEquals(-1d, resultV.vector[1]);
+    Assert.assertEquals(0d, resultV.vector[2]);
+    Assert.assertEquals(0d, resultV.vector[3]);
+    Assert.assertEquals(1d, resultV.vector[4]);
+    Assert.assertEquals(1d, resultV.vector[5]);
+    Assert.assertEquals(2d, resultV.vector[6]);
 
     // spot check null propagation
     b.cols[0].noNulls = false;
@@ -99,13 +99,13 @@ public class TestVectorMathFunctions {
     b.cols[0].isRepeating = true;
     resultV.isRepeating = false;
     expr.evaluate(b);
-    Assert.assertEquals(-2d, resultV.vector[0], Double.MIN_VALUE);
+    Assert.assertEquals(-2d, resultV.vector[0]);
     Assert.assertEquals(true, resultV.isRepeating);
 
     resultV.isRepeating = false;
     b.cols[0].noNulls = true;
     expr.evaluate(b);
-    Assert.assertEquals(-2d, resultV.vector[0], Double.MIN_VALUE);
+    Assert.assertEquals(-2d, resultV.vector[0]);
     Assert.assertEquals(true, resultV.isRepeating);
   }
 
@@ -117,7 +117,7 @@ public class TestVectorMathFunctions {
     DoubleColumnVector resultV = (DoubleColumnVector) b.cols[1];
 
     // Verify result is rounded to 4 digits
-    Assert.assertEquals(1.2346d, resultV.vector[7], Double.MIN_VALUE);
+    Assert.assertEquals(1.2346d, resultV.vector[7]);
   }
 
   static int DAYS_LIMIT = 365 * 9999;
@@ -367,7 +367,7 @@ public class TestVectorMathFunctions {
     b.cols[0].noNulls = true;
     VectorExpression expr = new FuncSinDoubleToDouble(0, 1);
     expr.evaluate(b);
-    Assert.assertEquals(Math.sin(0.5d), resultV.vector[4], Double.MIN_VALUE);
+    Assert.assertEquals(Math.sin(0.5d), resultV.vector[4]);
   }
 
   @Test
@@ -377,7 +377,7 @@ public class TestVectorMathFunctions {
     b.cols[0].noNulls = true;
     VectorExpression expr = new FuncCosDoubleToDouble(0, 1);
     expr.evaluate(b);
-    Assert.assertEquals(Math.cos(0.5d), resultV.vector[4], Double.MIN_VALUE);
+    Assert.assertEquals(Math.cos(0.5d), resultV.vector[4]);
   }
 
   @Test
@@ -387,7 +387,7 @@ public class TestVectorMathFunctions {
     b.cols[0].noNulls = true;
     VectorExpression expr = new FuncTanDoubleToDouble(0, 1);
     expr.evaluate(b);
-    Assert.assertEquals(Math.tan(0.5d), resultV.vector[4], Double.MIN_VALUE);
+    Assert.assertEquals(Math.tan(0.5d), resultV.vector[4]);
   }
 
   @Test
@@ -397,7 +397,7 @@ public class TestVectorMathFunctions {
     b.cols[0].noNulls = true;
     VectorExpression expr = new FuncASinDoubleToDouble(0, 1);
     expr.evaluate(b);
-    Assert.assertEquals(Math.asin(0.5d), resultV.vector[4], Double.MIN_VALUE);
+    Assert.assertEquals(Math.asin(0.5d), resultV.vector[4]);
   }
 
   @Test
@@ -407,7 +407,7 @@ public class TestVectorMathFunctions {
     b.cols[0].noNulls = true;
     VectorExpression expr = new FuncACosDoubleToDouble(0, 1);
     expr.evaluate(b);
-    Assert.assertEquals(Math.acos(0.5d), resultV.vector[4], Double.MIN_VALUE);
+    Assert.assertEquals(Math.acos(0.5d), resultV.vector[4]);
   }
 
   @Test
@@ -417,7 +417,7 @@ public class TestVectorMathFunctions {
     b.cols[0].noNulls = true;
     VectorExpression expr = new FuncATanDoubleToDouble(0, 1);
     expr.evaluate(b);
-    Assert.assertEquals(Math.atan(0.5d), resultV.vector[4], Double.MIN_VALUE);
+    Assert.assertEquals(Math.atan(0.5d), resultV.vector[4]);
   }
 
   @Test
@@ -427,7 +427,7 @@ public class TestVectorMathFunctions {
     b.cols[0].noNulls = true;
     VectorExpression expr = new FuncDegreesDoubleToDouble(0, 1);
     expr.evaluate(b);
-    Assert.assertEquals(Math.toDegrees(0.5d), resultV.vector[4], Double.MIN_VALUE);
+    Assert.assertEquals(Math.toDegrees(0.5d), resultV.vector[4]);
   }
 
   @Test
@@ -437,7 +437,7 @@ public class TestVectorMathFunctions {
     b.cols[0].noNulls = true;
     VectorExpression expr = new FuncRadiansDoubleToDouble(0, 1);
     expr.evaluate(b);
-    Assert.assertEquals(Math.toRadians(0.5d), resultV.vector[4], Double.MIN_VALUE);
+    Assert.assertEquals(Math.toRadians(0.5d), resultV.vector[4]);
   }
 
   @Test
@@ -469,7 +469,7 @@ public class TestVectorMathFunctions {
     b.cols[0].noNulls = true;
     VectorExpression expr = new FuncExpDoubleToDouble(0, 1);
     expr.evaluate(b);
-    Assert.assertEquals(Math.exp(0.5d), resultV.vector[4], Double.MIN_VALUE);
+    Assert.assertEquals(Math.exp(0.5d), resultV.vector[4]);
   }
 
   @Test
@@ -481,7 +481,7 @@ public class TestVectorMathFunctions {
     b.cols[0].noNulls = true;
     VectorExpression expr = new FuncLnDoubleToDouble(0, 1);
     expr.evaluate(b);
-    Assert.assertEquals(Math.log(0.5), resultV.vector[4], Double.MIN_VALUE);
+    Assert.assertEquals(Math.log(0.5), resultV.vector[4]);
 
     // test long->double version
     b = getVectorizedRowBatchLongInDoubleOut();
@@ -489,7 +489,7 @@ public class TestVectorMathFunctions {
     b.cols[0].noNulls = true;
     expr = new FuncLnLongToDouble(0, 1);
     expr.evaluate(b);
-    Assert.assertEquals(Math.log(2), resultV.vector[4], Double.MIN_VALUE);
+    Assert.assertEquals(Math.log(2), resultV.vector[4]);
   }
 
   @Test
@@ -501,7 +501,7 @@ public class TestVectorMathFunctions {
     b.cols[0].noNulls = true;
     VectorExpression expr = new FuncLog2DoubleToDouble(0, 1);
     expr.evaluate(b);
-    Assert.assertEquals(Math.log(0.5d) / Math.log(2), resultV.vector[4], Double.MIN_VALUE);
+    Assert.assertEquals(Math.log(0.5d) / Math.log(2), resultV.vector[4]);
 
     // test long->double version
     b = getVectorizedRowBatchLongInDoubleOut();
@@ -509,7 +509,7 @@ public class TestVectorMathFunctions {
     b.cols[0].noNulls = true;
     expr = new FuncLog2LongToDouble(0, 1);
     expr.evaluate(b);
-    Assert.assertEquals(Math.log(1) / Math.log(2), resultV.vector[3], Double.MIN_VALUE);
+    Assert.assertEquals(Math.log(1) / Math.log(2), resultV.vector[3]);
   }
 
   @Test
@@ -529,7 +529,7 @@ public class TestVectorMathFunctions {
     b.cols[0].noNulls = true;
     expr = new FuncLog10LongToDouble(0, 1);
     expr.evaluate(b);
-    Assert.assertEquals(Math.log(1) / Math.log(10), resultV.vector[3], Double.MIN_VALUE);
+    Assert.assertEquals(Math.log(1) / Math.log(10), resultV.vector[3]);
   }
 
   @Test
@@ -664,7 +664,7 @@ public class TestVectorMathFunctions {
     b.cols[0].noNulls = true;
     VectorExpression expr = new FuncSqrtDoubleToDouble(0, 1);
     expr.evaluate(b);
-    Assert.assertEquals(Math.sqrt(0.5d), resultV.vector[4], Double.MIN_VALUE);
+    Assert.assertEquals(Math.sqrt(0.5d), resultV.vector[4]);
   }
 
   @Test
@@ -676,8 +676,8 @@ public class TestVectorMathFunctions {
     b.cols[0].noNulls = true;
     VectorExpression expr = new FuncAbsDoubleToDouble(0, 1);
     expr.evaluate(b);
-    Assert.assertEquals(1.5, resultV.vector[0], Double.MIN_VALUE);
-    Assert.assertEquals(0.5, resultV.vector[4], Double.MIN_VALUE);
+    Assert.assertEquals(1.5, resultV.vector[0]);
+    Assert.assertEquals(0.5, resultV.vector[4]);
 
     // test long->long version
     b = getVectorizedRowBatchLongInLongOut();
@@ -698,8 +698,8 @@ public class TestVectorMathFunctions {
     b.cols[0].noNulls = true;
     VectorExpression expr = new FuncSignDoubleToDouble(0, 1);
     expr.evaluate(b);
-    Assert.assertEquals(-1.0d, resultV.vector[0], Double.MIN_VALUE);
-    Assert.assertEquals(1.0d, resultV.vector[4], Double.MIN_VALUE);
+    Assert.assertEquals(-1.0d, resultV.vector[0]);
+    Assert.assertEquals(1.0d, resultV.vector[4]);
 
     // test long->double version
     b = getVectorizedRowBatchLongInDoubleOut();
@@ -707,8 +707,8 @@ public class TestVectorMathFunctions {
     b.cols[0].noNulls = true;
     expr = new FuncSignLongToDouble(0, 1);
     expr.evaluate(b);
-    Assert.assertEquals(-1.0d, resultV.vector[0], Double.MIN_VALUE);
-    Assert.assertEquals(1.0d, resultV.vector[4], Double.MIN_VALUE);
+    Assert.assertEquals(-1.0d, resultV.vector[0]);
+    Assert.assertEquals(1.0d, resultV.vector[4]);
   }
 
   @Test
