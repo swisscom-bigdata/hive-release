@@ -35,12 +35,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.hadoop.hive.metastore.utils.MetaStoreUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class MetastoreDefaultTransformer implements IMetaStoreMetadataTransformer {
   public static final Logger LOG = LoggerFactory.getLogger(MetastoreDefaultTransformer.class);
   private IHMSHandler hmsHandler = null;
+  private String defaultCatalog = null;
 
   private static final String CONNECTORREAD = "CONNECTORREAD".intern();
   private static final String CONNECTORWRITE = "CONNECTORWRITE".intern();
@@ -73,6 +75,7 @@ public class MetastoreDefaultTransformer implements IMetaStoreMetadataTransforme
   private List<String> insertOnlyList = new ArrayList<>();
   public MetastoreDefaultTransformer(IHMSHandler handler) throws HiveMetaException {
     this.hmsHandler = handler;
+    this.defaultCatalog = MetaStoreUtils.getDefaultCatalog(handler.getConf());
 
     acidWriteList.addAll(ACIDCOMMONWRITELIST);
     acidList.addAll(acidWriteList);
@@ -91,14 +94,20 @@ public class MetastoreDefaultTransformer implements IMetaStoreMetadataTransforme
     Map<Table, List<String>> ret = new HashMap<Table, List<String>>();
 
     for (Table table : objects) {
+      List<String> generated = new ArrayList<String>();
+      List<String> requiredReads = new ArrayList<>();
+      List<String> requiredWrites = new ArrayList<>();
+
+      if (!defaultCatalog.equalsIgnoreCase(table.getCatName())) {
+        ret.put(table, generated);
+        continue;
+      }
+
       Map<String, String> params = table.getParameters();
       String tableType = table.getTableType();
       String tCapabilities = params.get(OBJCAPABILITIES);
       int numBuckets = table.getSd().getNumBuckets();
       boolean isBucketed = (numBuckets > 0) ? true : false;
-      List<String> generated = new ArrayList<String>();
-      List<String> requiredReads = new ArrayList<>();
-      List<String> requiredWrites = new ArrayList<>();
 
       LOG.info("Table " + table.getTableName() + ",#bucket=" + numBuckets + ",isBucketed:" + isBucketed + ",tableType=" + tableType + ",tableCapabilities=" + tCapabilities);
 
@@ -432,7 +441,9 @@ public class MetastoreDefaultTransformer implements IMetaStoreMetadataTransforme
 
   @Override
   public List<Partition> transformPartitions(List<Partition> objects, Table table, List<String> processorCapabilities, String processorId) throws MetaException {
-    if (processorCapabilities != null && processorCapabilities.contains(MANAGERAWMETADATA)) {
+    if ((processorCapabilities != null && processorCapabilities.contains(MANAGERAWMETADATA)) ||
+        !defaultCatalog.equalsIgnoreCase(table.getCatName())) {
+      LOG.debug("Table belongs to non-default catalog, skipping translation");
       return objects;
     }
 
@@ -533,6 +544,11 @@ public class MetastoreDefaultTransformer implements IMetaStoreMetadataTransforme
 
   @Override
   public Table transformCreateTable(Table table, List<String> processorCapabilities, String processorId) throws MetaException {
+    if (!defaultCatalog.equalsIgnoreCase(table.getCatName())) {
+      LOG.debug("Table belongs to non-default catalog, skipping");
+      return table;
+    }
+
     Table newTable = new Table(table);
     LOG.info("Starting translation for CreateTable for processor " + processorId + " with " + processorCapabilities
         + " on table " + newTable.getTableName());
@@ -593,7 +609,9 @@ public class MetastoreDefaultTransformer implements IMetaStoreMetadataTransforme
    */
   @Override
   public Database transformDatabase(Database db, List<String> processorCapabilities, String processorId) throws MetaException {
-    if (processorCapabilities != null && processorCapabilities.contains(MANAGERAWMETADATA)) {
+    if ((processorCapabilities != null && processorCapabilities.contains(MANAGERAWMETADATA)) ||
+        !defaultCatalog.equalsIgnoreCase(db.getCatalogName())) {
+      LOG.debug("Database belongs to non-default catalog, skipping translation");
       return db;
     }
 
