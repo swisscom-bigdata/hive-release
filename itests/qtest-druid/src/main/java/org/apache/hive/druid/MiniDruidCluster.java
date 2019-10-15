@@ -133,6 +133,7 @@ public class MiniDruidCluster extends AbstractService {
         coordinatorMapBuilder.putAll(COMMON_DRUID_CONF)
             .putAll(COMMON_COORDINATOR_INDEXER)
             .put("druid.metadata.storage.connector.connectURI", derbyURI)
+            .put("druid.metadata.storage.connector.port", String.valueOf(derbyPort))
             .put("druid.indexer.logs.directory", indexingLogDir)
             .put("druid.zk.service.host", "localhost:" + zookeeperPort)
             .put("druid.coordinator.startDelay", "PT1S")
