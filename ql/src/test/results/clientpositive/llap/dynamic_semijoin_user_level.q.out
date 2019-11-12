@@ -106,12 +106,12 @@ PREHOOK: query: analyze table alltypesorc_int_n2 compute statistics for columns
 PREHOOK: type: ANALYZE_TABLE
 PREHOOK: Input: default@alltypesorc_int_n2
 PREHOOK: Output: default@alltypesorc_int_n2
-#### A masked pattern was here ####
+PREHOOK: Output: hdfs://### HDFS PATH ###
 POSTHOOK: query: analyze table alltypesorc_int_n2 compute statistics for columns
 POSTHOOK: type: ANALYZE_TABLE
 POSTHOOK: Input: default@alltypesorc_int_n2
 POSTHOOK: Output: default@alltypesorc_int_n2
-#### A masked pattern was here ####
+POSTHOOK: Output: hdfs://### HDFS PATH ###
 PREHOOK: query: analyze table srcpart_date_n9 compute statistics for columns
 PREHOOK: type: ANALYZE_TABLE
 PREHOOK: Input: default@srcpart_date_n9
@@ -120,7 +120,7 @@ PREHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 PREHOOK: Output: default@srcpart_date_n9
 PREHOOK: Output: default@srcpart_date_n9@ds=2008-04-08
 PREHOOK: Output: default@srcpart_date_n9@ds=2008-04-09
-#### A masked pattern was here ####
+PREHOOK: Output: hdfs://### HDFS PATH ###
 POSTHOOK: query: analyze table srcpart_date_n9 compute statistics for columns
 POSTHOOK: type: ANALYZE_TABLE
 POSTHOOK: Input: default@srcpart_date_n9
@@ -129,7 +129,7 @@ POSTHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 POSTHOOK: Output: default@srcpart_date_n9
 POSTHOOK: Output: default@srcpart_date_n9@ds=2008-04-08
 POSTHOOK: Output: default@srcpart_date_n9@ds=2008-04-09
-#### A masked pattern was here ####
+POSTHOOK: Output: hdfs://### HDFS PATH ###
 PREHOOK: query: analyze table srcpart_small_n4 compute statistics for columns
 PREHOOK: type: ANALYZE_TABLE
 PREHOOK: Input: default@srcpart_small_n4
@@ -138,7 +138,7 @@ PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
 PREHOOK: Output: default@srcpart_small_n4
 PREHOOK: Output: default@srcpart_small_n4@ds=2008-04-08
 PREHOOK: Output: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+PREHOOK: Output: hdfs://### HDFS PATH ###
 POSTHOOK: query: analyze table srcpart_small_n4 compute statistics for columns
 POSTHOOK: type: ANALYZE_TABLE
 POSTHOOK: Input: default@srcpart_small_n4
@@ -147,7 +147,7 @@ POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
 POSTHOOK: Output: default@srcpart_small_n4
 POSTHOOK: Output: default@srcpart_small_n4@ds=2008-04-08
 POSTHOOK: Output: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+POSTHOOK: Output: hdfs://### HDFS PATH ###
 PREHOOK: query: EXPLAIN select count(*) from srcpart_date_n9 join srcpart_small_n4 on (srcpart_date_n9.key = srcpart_small_n4.key1)
 PREHOOK: type: QUERY
 PREHOOK: Input: default@srcpart_date_n9
@@ -156,7 +156,7 @@ PREHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 PREHOOK: Input: default@srcpart_small_n4
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+PREHOOK: Output: hdfs://### HDFS PATH ###
 POSTHOOK: query: EXPLAIN select count(*) from srcpart_date_n9 join srcpart_small_n4 on (srcpart_date_n9.key = srcpart_small_n4.key1)
 POSTHOOK: type: QUERY
 POSTHOOK: Input: default@srcpart_date_n9
@@ -165,7 +165,7 @@ POSTHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 POSTHOOK: Input: default@srcpart_small_n4
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+POSTHOOK: Output: hdfs://### HDFS PATH ###
 Plan optimized by CBO.
 
 Vertex dependency in root stage
@@ -226,7 +226,7 @@ PREHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 PREHOOK: Input: default@srcpart_small_n4
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+PREHOOK: Output: hdfs://### HDFS PATH ###
 POSTHOOK: query: select count(*) from srcpart_date_n9 join srcpart_small_n4 on (srcpart_date_n9.key = srcpart_small_n4.key1)
 POSTHOOK: type: QUERY
 POSTHOOK: Input: default@srcpart_date_n9
@@ -235,7 +235,7 @@ POSTHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 POSTHOOK: Input: default@srcpart_small_n4
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+POSTHOOK: Output: hdfs://### HDFS PATH ###
 176
 PREHOOK: query: EXPLAIN select count(*) from srcpart_date_n9 join srcpart_small_n4 on (srcpart_date_n9.key = srcpart_small_n4.ds)
 PREHOOK: type: QUERY
@@ -245,7 +245,7 @@ PREHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 PREHOOK: Input: default@srcpart_small_n4
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+PREHOOK: Output: hdfs://### HDFS PATH ###
 POSTHOOK: query: EXPLAIN select count(*) from srcpart_date_n9 join srcpart_small_n4 on (srcpart_date_n9.key = srcpart_small_n4.ds)
 POSTHOOK: type: QUERY
 POSTHOOK: Input: default@srcpart_date_n9
@@ -254,7 +254,7 @@ POSTHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 POSTHOOK: Input: default@srcpart_small_n4
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+POSTHOOK: Output: hdfs://### HDFS PATH ###
 Plan optimized by CBO.
 
 Vertex dependency in root stage
@@ -306,7 +306,7 @@ PREHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 PREHOOK: Input: default@srcpart_small_n4
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+PREHOOK: Output: hdfs://### HDFS PATH ###
 POSTHOOK: query: select count(*) from srcpart_date_n9 join srcpart_small_n4 on (srcpart_date_n9.key = srcpart_small_n4.ds)
 POSTHOOK: type: QUERY
 POSTHOOK: Input: default@srcpart_date_n9
@@ -315,7 +315,7 @@ POSTHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 POSTHOOK: Input: default@srcpart_small_n4
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+POSTHOOK: Output: hdfs://### HDFS PATH ###
 0
 PREHOOK: query: EXPLAIN select count(*) from srcpart_date_n9 join srcpart_small_n4 on (srcpart_date_n9.key = srcpart_small_n4.key1) join alltypesorc_int_n2 on (srcpart_small_n4.key1 = alltypesorc_int_n2.cstring)
 PREHOOK: type: QUERY
@@ -326,7 +326,7 @@ PREHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 PREHOOK: Input: default@srcpart_small_n4
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+PREHOOK: Output: hdfs://### HDFS PATH ###
 POSTHOOK: query: EXPLAIN select count(*) from srcpart_date_n9 join srcpart_small_n4 on (srcpart_date_n9.key = srcpart_small_n4.key1) join alltypesorc_int_n2 on (srcpart_small_n4.key1 = alltypesorc_int_n2.cstring)
 POSTHOOK: type: QUERY
 POSTHOOK: Input: default@alltypesorc_int_n2
@@ -336,7 +336,7 @@ POSTHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 POSTHOOK: Input: default@srcpart_small_n4
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+POSTHOOK: Output: hdfs://### HDFS PATH ###
 Plan optimized by CBO.
 
 Vertex dependency in root stage
@@ -394,7 +394,7 @@ PREHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 PREHOOK: Input: default@srcpart_small_n4
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+PREHOOK: Output: hdfs://### HDFS PATH ###
 POSTHOOK: query: select count(*) from srcpart_date_n9 join srcpart_small_n4 on (srcpart_date_n9.key = srcpart_small_n4.key1) join alltypesorc_int_n2 on (srcpart_small_n4.key1 = alltypesorc_int_n2.cstring)
 POSTHOOK: type: QUERY
 POSTHOOK: Input: default@alltypesorc_int_n2
@@ -404,7 +404,7 @@ POSTHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 POSTHOOK: Input: default@srcpart_small_n4
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+POSTHOOK: Output: hdfs://### HDFS PATH ###
 0
 PREHOOK: query: EXPLAIN select count(*) from srcpart_date_n9 join srcpart_small_n4 on (srcpart_date_n9.key = srcpart_small_n4.key1) join alltypesorc_int_n2 on (srcpart_small_n4.key1 = alltypesorc_int_n2.cstring)
 PREHOOK: type: QUERY
@@ -415,7 +415,7 @@ PREHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 PREHOOK: Input: default@srcpart_small_n4
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+PREHOOK: Output: hdfs://### HDFS PATH ###
 POSTHOOK: query: EXPLAIN select count(*) from srcpart_date_n9 join srcpart_small_n4 on (srcpart_date_n9.key = srcpart_small_n4.key1) join alltypesorc_int_n2 on (srcpart_small_n4.key1 = alltypesorc_int_n2.cstring)
 POSTHOOK: type: QUERY
 POSTHOOK: Input: default@alltypesorc_int_n2
@@ -425,7 +425,7 @@ POSTHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 POSTHOOK: Input: default@srcpart_small_n4
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+POSTHOOK: Output: hdfs://### HDFS PATH ###
 Plan optimized by CBO.
 
 Vertex dependency in root stage
@@ -500,7 +500,7 @@ PREHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 PREHOOK: Input: default@srcpart_small_n4
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+PREHOOK: Output: hdfs://### HDFS PATH ###
 POSTHOOK: query: select count(*) from srcpart_date_n9 join srcpart_small_n4 on (srcpart_date_n9.key = srcpart_small_n4.key1) join alltypesorc_int_n2 on (srcpart_small_n4.key1 = alltypesorc_int_n2.cstring)
 POSTHOOK: type: QUERY
 POSTHOOK: Input: default@alltypesorc_int_n2
@@ -510,7 +510,7 @@ POSTHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 POSTHOOK: Input: default@srcpart_small_n4
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+POSTHOOK: Output: hdfs://### HDFS PATH ###
 0
 PREHOOK: query: EXPLAIN select count(*) from srcpart_date_n9 join srcpart_small_n4 on (srcpart_date_n9.key = srcpart_small_n4.key1 and srcpart_date_n9.value = srcpart_small_n4.value1)
 PREHOOK: type: QUERY
@@ -520,7 +520,7 @@ PREHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 PREHOOK: Input: default@srcpart_small_n4
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+PREHOOK: Output: hdfs://### HDFS PATH ###
 POSTHOOK: query: EXPLAIN select count(*) from srcpart_date_n9 join srcpart_small_n4 on (srcpart_date_n9.key = srcpart_small_n4.key1 and srcpart_date_n9.value = srcpart_small_n4.value1)
 POSTHOOK: type: QUERY
 POSTHOOK: Input: default@srcpart_date_n9
@@ -529,7 +529,7 @@ POSTHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 POSTHOOK: Input: default@srcpart_small_n4
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+POSTHOOK: Output: hdfs://### HDFS PATH ###
 Plan optimized by CBO.
 
 Vertex dependency in root stage
@@ -577,7 +577,7 @@ PREHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 PREHOOK: Input: default@srcpart_small_n4
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+PREHOOK: Output: hdfs://### HDFS PATH ###
 POSTHOOK: query: select count(*) from srcpart_date_n9 join srcpart_small_n4 on (srcpart_date_n9.key = srcpart_small_n4.key1 and srcpart_date_n9.value = srcpart_small_n4.value1)
 POSTHOOK: type: QUERY
 POSTHOOK: Input: default@srcpart_date_n9
@@ -586,7 +586,7 @@ POSTHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 POSTHOOK: Input: default@srcpart_small_n4
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+POSTHOOK: Output: hdfs://### HDFS PATH ###
 176
 PREHOOK: query: EXPLAIN select count(*) from srcpart_date_n9 join srcpart_small_n4 on (srcpart_date_n9.key = srcpart_small_n4.key1 and srcpart_date_n9.value = srcpart_small_n4.value1)
 PREHOOK: type: QUERY
@@ -596,7 +596,7 @@ PREHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 PREHOOK: Input: default@srcpart_small_n4
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+PREHOOK: Output: hdfs://### HDFS PATH ###
 POSTHOOK: query: EXPLAIN select count(*) from srcpart_date_n9 join srcpart_small_n4 on (srcpart_date_n9.key = srcpart_small_n4.key1 and srcpart_date_n9.value = srcpart_small_n4.value1)
 POSTHOOK: type: QUERY
 POSTHOOK: Input: default@srcpart_date_n9
@@ -605,7 +605,7 @@ POSTHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 POSTHOOK: Input: default@srcpart_small_n4
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+POSTHOOK: Output: hdfs://### HDFS PATH ###
 Plan optimized by CBO.
 
 Vertex dependency in root stage
@@ -666,7 +666,7 @@ PREHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 PREHOOK: Input: default@srcpart_small_n4
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+PREHOOK: Output: hdfs://### HDFS PATH ###
 POSTHOOK: query: select count(*) from srcpart_date_n9 join srcpart_small_n4 on (srcpart_date_n9.key = srcpart_small_n4.key1 and srcpart_date_n9.value = srcpart_small_n4.value1)
 POSTHOOK: type: QUERY
 POSTHOOK: Input: default@srcpart_date_n9
@@ -675,7 +675,7 @@ POSTHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 POSTHOOK: Input: default@srcpart_small_n4
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+POSTHOOK: Output: hdfs://### HDFS PATH ###
 176
 PREHOOK: query: EXPLAIN select count(*) from srcpart_date_n9 join srcpart_small_n4 on (srcpart_date_n9.key = srcpart_small_n4.key1) join alltypesorc_int_n2 on (srcpart_date_n9.value = alltypesorc_int_n2.cstring)
 PREHOOK: type: QUERY
@@ -686,7 +686,7 @@ PREHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 PREHOOK: Input: default@srcpart_small_n4
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+PREHOOK: Output: hdfs://### HDFS PATH ###
 POSTHOOK: query: EXPLAIN select count(*) from srcpart_date_n9 join srcpart_small_n4 on (srcpart_date_n9.key = srcpart_small_n4.key1) join alltypesorc_int_n2 on (srcpart_date_n9.value = alltypesorc_int_n2.cstring)
 POSTHOOK: type: QUERY
 POSTHOOK: Input: default@alltypesorc_int_n2
@@ -696,7 +696,7 @@ POSTHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 POSTHOOK: Input: default@srcpart_small_n4
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+POSTHOOK: Output: hdfs://### HDFS PATH ###
 Plan optimized by CBO.
 
 Vertex dependency in root stage
@@ -760,7 +760,7 @@ PREHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 PREHOOK: Input: default@srcpart_small_n4
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+PREHOOK: Output: hdfs://### HDFS PATH ###
 POSTHOOK: query: select count(*) from srcpart_date_n9 join srcpart_small_n4 on (srcpart_date_n9.key = srcpart_small_n4.key1) join alltypesorc_int_n2 on (srcpart_date_n9.value = alltypesorc_int_n2.cstring)
 POSTHOOK: type: QUERY
 POSTHOOK: Input: default@alltypesorc_int_n2
@@ -770,7 +770,7 @@ POSTHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 POSTHOOK: Input: default@srcpart_small_n4
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+POSTHOOK: Output: hdfs://### HDFS PATH ###
 0
 PREHOOK: query: EXPLAIN select count(*) from srcpart_date_n9 join srcpart_small_n4 on (srcpart_date_n9.key = srcpart_small_n4.key1) join alltypesorc_int_n2 on (srcpart_date_n9.value = alltypesorc_int_n2.cstring)
 PREHOOK: type: QUERY
@@ -781,7 +781,7 @@ PREHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 PREHOOK: Input: default@srcpart_small_n4
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+PREHOOK: Output: hdfs://### HDFS PATH ###
 POSTHOOK: query: EXPLAIN select count(*) from srcpart_date_n9 join srcpart_small_n4 on (srcpart_date_n9.key = srcpart_small_n4.key1) join alltypesorc_int_n2 on (srcpart_date_n9.value = alltypesorc_int_n2.cstring)
 POSTHOOK: type: QUERY
 POSTHOOK: Input: default@alltypesorc_int_n2
@@ -791,7 +791,7 @@ POSTHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 POSTHOOK: Input: default@srcpart_small_n4
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+POSTHOOK: Output: hdfs://### HDFS PATH ###
 Plan optimized by CBO.
 
 Vertex dependency in root stage
@@ -881,7 +881,7 @@ PREHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 PREHOOK: Input: default@srcpart_small_n4
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+PREHOOK: Output: hdfs://### HDFS PATH ###
 POSTHOOK: query: select count(*) from srcpart_date_n9 join srcpart_small_n4 on (srcpart_date_n9.key = srcpart_small_n4.key1) join alltypesorc_int_n2 on (srcpart_date_n9.value = alltypesorc_int_n2.cstring)
 POSTHOOK: type: QUERY
 POSTHOOK: Input: default@alltypesorc_int_n2
@@ -891,7 +891,7 @@ POSTHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 POSTHOOK: Input: default@srcpart_small_n4
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+POSTHOOK: Output: hdfs://### HDFS PATH ###
 0
 PREHOOK: query: EXPLAIN extended select count(*) from srcpart_date_n9 join srcpart_small_n4 on (srcpart_date_n9.key = srcpart_small_n4.key1)
 PREHOOK: type: QUERY
@@ -901,7 +901,7 @@ PREHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 PREHOOK: Input: default@srcpart_small_n4
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+PREHOOK: Output: hdfs://### HDFS PATH ###
 POSTHOOK: query: EXPLAIN extended select count(*) from srcpart_date_n9 join srcpart_small_n4 on (srcpart_date_n9.key = srcpart_small_n4.key1)
 POSTHOOK: type: QUERY
 POSTHOOK: Input: default@srcpart_date_n9
@@ -910,7 +910,7 @@ POSTHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 POSTHOOK: Input: default@srcpart_small_n4
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+POSTHOOK: Output: hdfs://### HDFS PATH ###
 OPTIMIZED SQL: SELECT COUNT(*) AS `$f0`
 FROM (SELECT `key`
 FROM `default`.`srcpart_date_n9`
@@ -959,9 +959,10 @@ STAGE PLANS:
             Execution mode: llap
             LLAP IO: all inputs
             Path -> Alias:
-#### A masked pattern was here ####
+              hdfs://### HDFS PATH ### [srcpart_date_n9]
+              hdfs://### HDFS PATH ### [srcpart_date_n9]
             Path -> Partition:
-#### A masked pattern was here ####
+              hdfs://### HDFS PATH ### 
                 Partition
                   base file name: ds=2008-04-08
                   input format: org.apache.hadoop.hive.ql.io.orc.OrcInputFormat
@@ -972,6 +973,7 @@ STAGE PLANS:
                     COLUMN_STATS_ACCURATE {"BASIC_STATS":"true","COLUMN_STATS":{"key":"true","value":"true"}}
                     bucket_count -1
 #### A masked pattern was here ####
+                    location hdfs://### HDFS PATH ###
                     name default.srcpart_date_n9
                     numFiles 1
                     numRows 1000
@@ -995,6 +997,7 @@ STAGE PLANS:
                       columns.comments 
                       columns.types string:string
 #### A masked pattern was here ####
+                      location hdfs://### HDFS PATH ###
                       name default.srcpart_date_n9
                       partition_columns ds
                       partition_columns.types string
@@ -1005,7 +1008,7 @@ STAGE PLANS:
                     serde: org.apache.hadoop.hive.ql.io.orc.OrcSerde
                     name: default.srcpart_date_n9
                   name: default.srcpart_date_n9
-#### A masked pattern was here ####
+              hdfs://### HDFS PATH ### 
                 Partition
                   base file name: ds=2008-04-09
                   input format: org.apache.hadoop.hive.ql.io.orc.OrcInputFormat
@@ -1016,6 +1019,7 @@ STAGE PLANS:
                     COLUMN_STATS_ACCURATE {"BASIC_STATS":"true","COLUMN_STATS":{"key":"true","value":"true"}}
                     bucket_count -1
 #### A masked pattern was here ####
+                    location hdfs://### HDFS PATH ###
                     name default.srcpart_date_n9
                     numFiles 1
                     numRows 1000
@@ -1039,6 +1043,7 @@ STAGE PLANS:
                       columns.comments 
                       columns.types string:string
 #### A masked pattern was here ####
+                      location hdfs://### HDFS PATH ###
                       name default.srcpart_date_n9
                       partition_columns ds
                       partition_columns.types string
@@ -1094,9 +1099,10 @@ STAGE PLANS:
             Execution mode: llap
             LLAP IO: all inputs
             Path -> Alias:
-#### A masked pattern was here ####
+              hdfs://### HDFS PATH ### [srcpart_small_n4]
+              hdfs://### HDFS PATH ### [srcpart_small_n4]
             Path -> Partition:
-#### A masked pattern was here ####
+              hdfs://### HDFS PATH ### 
                 Partition
                   base file name: ds=2008-04-08
                   input format: org.apache.hadoop.hive.ql.io.orc.OrcInputFormat
@@ -1107,6 +1113,7 @@ STAGE PLANS:
                     COLUMN_STATS_ACCURATE {"BASIC_STATS":"true","COLUMN_STATS":{"key1":"true","value1":"true"}}
                     bucket_count -1
 #### A masked pattern was here ####
+                    location hdfs://### HDFS PATH ###
                     name default.srcpart_small_n4
                     numFiles 0
                     numRows 0
@@ -1130,6 +1137,7 @@ STAGE PLANS:
                       columns.comments 
                       columns.types string:string
 #### A masked pattern was here ####
+                      location hdfs://### HDFS PATH ###
                       name default.srcpart_small_n4
                       partition_columns ds
                       partition_columns.types string
@@ -1140,7 +1148,7 @@ STAGE PLANS:
                     serde: org.apache.hadoop.hive.ql.io.orc.OrcSerde
                     name: default.srcpart_small_n4
                   name: default.srcpart_small_n4
-#### A masked pattern was here ####
+              hdfs://### HDFS PATH ### 
                 Partition
                   base file name: ds=2008-04-09
                   input format: org.apache.hadoop.hive.ql.io.orc.OrcInputFormat
@@ -1151,6 +1159,7 @@ STAGE PLANS:
                     COLUMN_STATS_ACCURATE {"BASIC_STATS":"true","COLUMN_STATS":{"key1":"true","value1":"true"}}
                     bucket_count -1
 #### A masked pattern was here ####
+                    location hdfs://### HDFS PATH ###
                     name default.srcpart_small_n4
                     numFiles 1
                     numRows 20
@@ -1174,6 +1183,7 @@ STAGE PLANS:
                       columns.comments 
                       columns.types string:string
 #### A masked pattern was here ####
+                      location hdfs://### HDFS PATH ###
                       name default.srcpart_small_n4
                       partition_columns ds
                       partition_columns.types string
@@ -1223,10 +1233,10 @@ STAGE PLANS:
                 File Output Operator
                   compressed: false
                   GlobalTableId: 0
-#### A masked pattern was here ####
+                  directory: hdfs://### HDFS PATH ###
                   NumFilesPerFileSink: 1
                   Statistics: Num rows: 1 Data size: 8 Basic stats: PARTIAL Column stats: NONE
-#### A masked pattern was here ####
+                  Stats Publishing Key Prefix: hdfs://### HDFS PATH ###
                   table:
                       input format: org.apache.hadoop.mapred.SequenceFileInputFormat
                       output format: org.apache.hadoop.hive.ql.io.HiveSequenceFileOutputFormat
@@ -1273,7 +1283,7 @@ PREHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 PREHOOK: Input: default@srcpart_small_n4
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+PREHOOK: Output: hdfs://### HDFS PATH ###
 POSTHOOK: query: EXPLAIN select count(*) from srcpart_date_n9 join srcpart_small_n4 on (srcpart_date_n9.key = srcpart_small_n4.key1)
 POSTHOOK: type: QUERY
 POSTHOOK: Input: default@srcpart_date_n9
@@ -1282,7 +1292,7 @@ POSTHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 POSTHOOK: Input: default@srcpart_small_n4
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+POSTHOOK: Output: hdfs://### HDFS PATH ###
 Plan optimized by CBO.
 
 Vertex dependency in root stage
@@ -1327,7 +1337,7 @@ PREHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 PREHOOK: Input: default@srcpart_small_n4
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+PREHOOK: Output: hdfs://### HDFS PATH ###
 POSTHOOK: query: select count(*) from srcpart_date_n9 join srcpart_small_n4 on (srcpart_date_n9.key = srcpart_small_n4.key1)
 POSTHOOK: type: QUERY
 POSTHOOK: Input: default@srcpart_date_n9
@@ -1336,7 +1346,7 @@ POSTHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 POSTHOOK: Input: default@srcpart_small_n4
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+POSTHOOK: Output: hdfs://### HDFS PATH ###
 176
 PREHOOK: query: EXPLAIN select count(*) from srcpart_date_n9 join srcpart_small_n4 on (srcpart_date_n9.key = srcpart_small_n4.key1)
 PREHOOK: type: QUERY
@@ -1346,7 +1356,7 @@ PREHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 PREHOOK: Input: default@srcpart_small_n4
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+PREHOOK: Output: hdfs://### HDFS PATH ###
 POSTHOOK: query: EXPLAIN select count(*) from srcpart_date_n9 join srcpart_small_n4 on (srcpart_date_n9.key = srcpart_small_n4.key1)
 POSTHOOK: type: QUERY
 POSTHOOK: Input: default@srcpart_date_n9
@@ -1355,7 +1365,7 @@ POSTHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 POSTHOOK: Input: default@srcpart_small_n4
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+POSTHOOK: Output: hdfs://### HDFS PATH ###
 Plan optimized by CBO.
 
 Vertex dependency in root stage
@@ -1400,7 +1410,7 @@ PREHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 PREHOOK: Input: default@srcpart_small_n4
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+PREHOOK: Output: hdfs://### HDFS PATH ###
 POSTHOOK: query: select count(*) from srcpart_date_n9 join srcpart_small_n4 on (srcpart_date_n9.key = srcpart_small_n4.key1)
 POSTHOOK: type: QUERY
 POSTHOOK: Input: default@srcpart_date_n9
@@ -1409,7 +1419,7 @@ POSTHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 POSTHOOK: Input: default@srcpart_small_n4
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+POSTHOOK: Output: hdfs://### HDFS PATH ###
 176
 PREHOOK: query: EXPLAIN select count(*) from srcpart_date_n9 join srcpart_small_n4 on (srcpart_date_n9.key = srcpart_small_n4.key1) join alltypesorc_int_n2 on (srcpart_date_n9.value = alltypesorc_int_n2.cstring)
 PREHOOK: type: QUERY
@@ -1420,7 +1430,7 @@ PREHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 PREHOOK: Input: default@srcpart_small_n4
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+PREHOOK: Output: hdfs://### HDFS PATH ###
 POSTHOOK: query: EXPLAIN select count(*) from srcpart_date_n9 join srcpart_small_n4 on (srcpart_date_n9.key = srcpart_small_n4.key1) join alltypesorc_int_n2 on (srcpart_date_n9.value = alltypesorc_int_n2.cstring)
 POSTHOOK: type: QUERY
 POSTHOOK: Input: default@alltypesorc_int_n2
@@ -1430,7 +1440,7 @@ POSTHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 POSTHOOK: Input: default@srcpart_small_n4
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+POSTHOOK: Output: hdfs://### HDFS PATH ###
 Plan optimized by CBO.
 
 Vertex dependency in root stage
@@ -1488,7 +1498,7 @@ PREHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 PREHOOK: Input: default@srcpart_small_n4
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+PREHOOK: Output: hdfs://### HDFS PATH ###
 POSTHOOK: query: select count(*) from srcpart_date_n9 join srcpart_small_n4 on (srcpart_date_n9.key = srcpart_small_n4.key1) join alltypesorc_int_n2 on (srcpart_date_n9.value = alltypesorc_int_n2.cstring)
 POSTHOOK: type: QUERY
 POSTHOOK: Input: default@alltypesorc_int_n2
@@ -1498,7 +1508,7 @@ POSTHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 POSTHOOK: Input: default@srcpart_small_n4
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+POSTHOOK: Output: hdfs://### HDFS PATH ###
 0
 PREHOOK: query: EXPLAIN select count(*) from srcpart_date_n9 join srcpart_small_n4 on (srcpart_date_n9.key = srcpart_small_n4.key1) join alltypesorc_int_n2 on (srcpart_date_n9.value = alltypesorc_int_n2.cstring)
 PREHOOK: type: QUERY
@@ -1509,7 +1519,7 @@ PREHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 PREHOOK: Input: default@srcpart_small_n4
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+PREHOOK: Output: hdfs://### HDFS PATH ###
 POSTHOOK: query: EXPLAIN select count(*) from srcpart_date_n9 join srcpart_small_n4 on (srcpart_date_n9.key = srcpart_small_n4.key1) join alltypesorc_int_n2 on (srcpart_date_n9.value = alltypesorc_int_n2.cstring)
 POSTHOOK: type: QUERY
 POSTHOOK: Input: default@alltypesorc_int_n2
@@ -1519,7 +1529,7 @@ POSTHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 POSTHOOK: Input: default@srcpart_small_n4
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+POSTHOOK: Output: hdfs://### HDFS PATH ###
 Plan optimized by CBO.
 
 Vertex dependency in root stage
@@ -1577,7 +1587,7 @@ PREHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 PREHOOK: Input: default@srcpart_small_n4
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+PREHOOK: Output: hdfs://### HDFS PATH ###
 POSTHOOK: query: select count(*) from srcpart_date_n9 join srcpart_small_n4 on (srcpart_date_n9.key = srcpart_small_n4.key1) join alltypesorc_int_n2 on (srcpart_date_n9.value = alltypesorc_int_n2.cstring)
 POSTHOOK: type: QUERY
 POSTHOOK: Input: default@alltypesorc_int_n2
@@ -1587,7 +1597,7 @@ POSTHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 POSTHOOK: Input: default@srcpart_small_n4
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+POSTHOOK: Output: hdfs://### HDFS PATH ###
 0
 PREHOOK: query: explain select * from alltypesorc_int_n2 join
                                       (select srcpart_date_n9.key as key from srcpart_date_n9
@@ -1601,7 +1611,7 @@ PREHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 PREHOOK: Input: default@srcpart_small_n4
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 PREHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+PREHOOK: Output: hdfs://### HDFS PATH ###
 POSTHOOK: query: explain select * from alltypesorc_int_n2 join
                                       (select srcpart_date_n9.key as key from srcpart_date_n9
                                        union all
@@ -1614,7 +1624,7 @@ POSTHOOK: Input: default@srcpart_date_n9@ds=2008-04-09
 POSTHOOK: Input: default@srcpart_small_n4
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-08
 POSTHOOK: Input: default@srcpart_small_n4@ds=2008-04-09
-#### A masked pattern was here ####
+POSTHOOK: Output: hdfs://### HDFS PATH ###
 Plan optimized by CBO.
 
 Vertex dependency in root stage
