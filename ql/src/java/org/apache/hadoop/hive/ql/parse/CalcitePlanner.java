@@ -279,7 +279,7 @@ public class CalcitePlanner extends SemanticAnalyzer {
             // PartitionList is not evaluated until the run phase.
             getMetaData(getQB());
 
-            disableJoinMerge = false;
+            disableJoinMerge = defaultJoinMerge;
             sinkOp = genPlan(getQB());
             LOG.info("CBO Succeeded; optimized logical plan.");
             this.ctx.setCboInfo("Plan optimized by CBO.");
@@ -322,7 +322,7 @@ public class CalcitePlanner extends SemanticAnalyzer {
           }
         } finally {
           runCBO = false;
-          disableJoinMerge = false;
+          disableJoinMerge = defaultJoinMerge;
           if (reAnalyzeAST) {
             init(true);
             prunedPartitions.clear();
