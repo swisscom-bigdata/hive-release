@@ -133,11 +133,8 @@ public class MetastoreDefaultTransformer implements IMetaStoreMetadataTransforme
                 LOG.debug("External bucketed table without HB2 capability:RO");
                 newTable.setAccessType(ACCESSTYPE_READONLY);
                 requiredWrites.add(HIVEBUCKET2);
-                StorageDescriptor newSd = new StorageDescriptor(table.getSd());
-                newSd.setNumBuckets(-1); // remove bucketing info
-                newTable.setSd(newSd);
                 newTable.setRequiredWriteCapabilities(requiredWrites);
-                LOG.info("Bucketed table without HIVEBUCKET2 capability, removed bucketing info from table");
+                LOG.info("Bucketed table without HIVEBUCKET2 capability, mark it readonly, but expose metadata");
               }
             } else { // Unbucketed
               if (processorCapabilities.contains(EXTWRITE) && processorCapabilities.contains(EXTREAD)) {
