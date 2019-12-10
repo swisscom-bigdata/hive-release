@@ -47,14 +47,10 @@ import org.slf4j.LoggerFactory;
 import org.apache.hive.storage.jdbc.conf.JdbcStorageConfig;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
-
-import static java.time.ZoneOffset.UTC;
 
 public class JdbcSerDe extends AbstractSerDe {
 
@@ -207,7 +203,7 @@ public class JdbcSerDe extends AbstractSerDe {
           if (rowVal instanceof Number) {
             rowVal = ((Number) value).intValue() != 0;
           } else {
-            rowVal = Boolean.valueOf(rowVal.toString());
+            rowVal = Boolean.valueOf(value.toString());
           }
           break;
         case CHAR:
@@ -221,16 +217,16 @@ public class JdbcSerDe extends AbstractSerDe {
           break;
         case DATE:
           if (rowVal instanceof java.sql.Date) {
-            LocalDate localDate = ((java.sql.Date) rowVal).toLocalDate();
-            rowVal = Date.of(localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth());
+            java.sql.Date dateRowVal = (java.sql.Date) rowVal;
+            rowVal = Date.ofEpochMilli(dateRowVal.getTime());
           } else {
             rowVal = Date.valueOf (rowVal.toString());
           }
           break;
         case TIMESTAMP:
           if (rowVal instanceof java.sql.Timestamp) {
-            LocalDateTime localDateTime = ((java.sql.Timestamp) rowVal).toLocalDateTime();
-            rowVal = Timestamp.ofEpochSecond(localDateTime.toEpochSecond(UTC), localDateTime.getNano());
+            java.sql.Timestamp timestampRowVal = (java.sql.Timestamp) rowVal;
+            rowVal = Timestamp.ofEpochMilli(timestampRowVal.getTime(), timestampRowVal.getNanos());
           } else {
             rowVal = Timestamp.valueOf (rowVal.toString());
           }
