@@ -577,7 +577,9 @@ public class VectorizedBatchUtil {
 
   public static ColumnVector makeLikeColumnVector(ColumnVector source
                                         ) throws HiveException{
-    if (source instanceof LongColumnVector) {
+    if (source instanceof DateColumnVector) {
+      return new DateColumnVector(((DateColumnVector) source).vector.length);
+    } else if (source instanceof LongColumnVector) {
       return new LongColumnVector(((LongColumnVector) source).vector.length);
     } else if (source instanceof DoubleColumnVector) {
       return new DoubleColumnVector(((DoubleColumnVector) source).vector.length);

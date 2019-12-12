@@ -773,7 +773,7 @@ public class OrcEncodedDataReader extends CallableWithNdc<Void>
       sargApp = new RecordReaderImpl.SargApplier(sarg,
           rowIndexStride, evolution,
           OrcFile.WriterVersion.from(OrcFile.WriterImplementation.ORC_JAVA, fileMetadata.getWriterVersionNum()),
-          true, orcReader.getFileTail().getFooter().getCalendar() == CalendarKind.PROLEPTIC_GREGORIAN, true);
+          true, fileMetadata.getCalendar() == CalendarKind.PROLEPTIC_GREGORIAN, true);
     }
     boolean hasAnyData = false;
     // stripeRgs should have been initialized by this time with an empty array.

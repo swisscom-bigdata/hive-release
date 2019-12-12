@@ -66,13 +66,13 @@ class AvroSerializer {
    * any properties need to be added in a static initializer.
    */
   private static final Schema STRING_SCHEMA = Schema.create(Schema.Type.STRING);
-  private AvroGenericRecordWritable cache;
+  private AvroGenericRecordWritable cache = new AvroGenericRecordWritable();
   private boolean defaultProleptic;
 
-  AvroSerializer() {}
+  AvroSerializer() {
+  }
 
   AvroSerializer(Configuration configuration) {
-    this.cache = new AvroGenericRecordWritable();
     this.defaultProleptic = HiveConf.getBoolVar(
         configuration, ConfVars.HIVE_AVRO_PROLEPTIC_GREGORIAN);
   }
