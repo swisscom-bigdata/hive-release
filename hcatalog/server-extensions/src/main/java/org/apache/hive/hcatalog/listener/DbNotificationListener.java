@@ -52,6 +52,8 @@ import org.apache.hadoop.hive.metastore.api.SQLNotNullConstraint;
 import org.apache.hadoop.hive.metastore.api.SQLPrimaryKey;
 import org.apache.hadoop.hive.metastore.api.SQLUniqueConstraint;
 import org.apache.hadoop.hive.metastore.api.Table;
+import org.apache.hadoop.hive.metastore.api.TxnType;
+import org.apache.hadoop.hive.metastore.api.ColumnStatisticsDesc;
 import org.apache.hadoop.hive.metastore.conf.MetastoreConf;
 import org.apache.hadoop.hive.metastore.conf.MetastoreConf.ConfVars;
 import org.apache.hadoop.hive.metastore.events.AddForeignKeyEvent;
@@ -88,6 +90,8 @@ import org.apache.hadoop.hive.metastore.tools.SQLGenerator;
 import org.apache.hadoop.hive.metastore.txn.TxnUtils;
 import org.apache.hadoop.hive.metastore.utils.MetaStoreUtils;
 import org.apache.hadoop.util.StringUtils;
+import org.apache.hadoop.hive.metastore.messaging.AbortTxnMessage;
+import org.apache.hadoop.hive.metastore.messaging.CommitTxnMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.collect.Lists;
@@ -495,6 +499,9 @@ public class DbNotificationListener extends TransactionalMetaStoreEventListener 
 
   @Override
   public void onOpenTxn(OpenTxnEvent openTxnEvent, Connection dbConn, SQLGenerator sqlGenerator) throws MetaException {
+    if (openTxnEvent.getTxnType() == TxnType.READ_ONLY) {
+      return;
+    }
     int lastTxnIdx = openTxnEvent.getTxnIds().size() - 1;
     OpenTxnMessage msg = msgFactory.buildOpenTxnMessage(openTxnEvent.getTxnIds().get(0),
             openTxnEvent.getTxnIds().get(lastTxnIdx));
@@ -511,6 +518,10 @@ public class DbNotificationListener extends TransactionalMetaStoreEventListener 
   @Override
   public void onCommitTxn(CommitTxnEvent commitTxnEvent, Connection dbConn, SQLGenerator sqlGenerator)
           throws MetaException {
+    if (commitTxnEvent.getTxnType() == TxnType.READ_ONLY) {
+      return;
+    }
+
     NotificationEvent event =
             new NotificationEvent(0, now(), EventType.COMMIT_TXN.toString(), msgFactory.buildCommitTxnMessage(
                     commitTxnEvent.getTxnId())
@@ -526,6 +537,10 @@ public class DbNotificationListener extends TransactionalMetaStoreEventListener 
   @Override
   public void onAbortTxn(AbortTxnEvent abortTxnEvent, Connection dbConn, SQLGenerator sqlGenerator)
           throws MetaException {
+    if (abortTxnEvent.getTxnType() == TxnType.READ_ONLY) {
+      return;
+    }
+
     NotificationEvent event =
         new NotificationEvent(0, now(), EventType.ABORT_TXN.toString(), msgFactory.buildAbortTxnMessage(
             abortTxnEvent.getTxnId())

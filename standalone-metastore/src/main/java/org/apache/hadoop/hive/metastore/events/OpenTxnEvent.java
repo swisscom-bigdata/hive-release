@@ -23,6 +23,7 @@ import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.hive.metastore.IHMSHandler;
 import com.google.common.collect.Lists;
 import java.util.List;
+import org.apache.hadoop.hive.metastore.api.TxnType;
 
 /**
  * OpenTxnEvent
@@ -32,20 +33,38 @@ import java.util.List;
 @InterfaceStability.Stable
 public class OpenTxnEvent extends ListenerEvent {
   private List<Long> txnIds;
+  private final TxnType txnType;
 
-  /**
-   * @param txnIds List of unique identification for the transaction just opened.
-   * @param handler handler that is firing the event
-   */
   public OpenTxnEvent(List<Long> txnIds, IHMSHandler handler) {
-    super(true, handler);
-    this.txnIds = Lists.newArrayList(txnIds);
+    this(txnIds, null, handler);
+  }
+
+  public OpenTxnEvent(List<Long> txnIds, TxnType txnType) {
+    this(txnIds, txnType, null);
   }
 
   /**
-   * @return List<Long> txnIds
+   * @param txnIds List of unique identification for the transaction just opened.
+   * @param txnType type of transaction
+   * @param handler handler that is firing the event
+   */
+   public OpenTxnEvent(List<Long> txnIds, TxnType txnType, IHMSHandler handler) {
+     super(true, handler);
+     this.txnIds = Lists.newArrayList(txnIds);
+     this.txnType = txnType;
+   }
+
+  /**
+   * @return List&lt;Long&gt; txnIds
    */
   public List<Long> getTxnIds() {
     return txnIds;
   }
+
+  /**
+   * @return txnType
+   */
+  public TxnType getTxnType() {
+    return txnType;
+  }  
 }
