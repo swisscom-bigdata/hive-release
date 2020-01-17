@@ -298,7 +298,7 @@ public class TestListPartitions extends MetaStoreClientTest {
     client.listPartitions(DB_NAME, "", (short)-1);
   }
 
-  @Test
+  @Test(expected = MetaException.class)
   public void testListPartitionsAllNullTblName() throws Exception {
     try {
       createTable3PartCols1Part(client);
@@ -310,7 +310,7 @@ public class TestListPartitions extends MetaStoreClientTest {
     }
   }
 
-  @Test
+  @Test(expected = MetaException.class)
   public void testListPartitionsAllNullDbName() throws Exception {
     try {
       createTable3PartCols1Part(client);
@@ -675,7 +675,7 @@ public class TestListPartitions extends MetaStoreClientTest {
             .newArrayList("2017", "11", "27"), (short)-1, "", Lists.newArrayList());
   }
 
-  @Test
+  @Test(expected = MetaException.class)
   public void testListPartitionsWithAuthByValuesNullDbName() throws Exception {
     try {
       createTable4PartColsParts(client);
@@ -687,7 +687,7 @@ public class TestListPartitions extends MetaStoreClientTest {
     }
   }
 
-  @Test
+  @Test(expected = MetaException.class)
   public void testListPartitionsWithAuthByValuesNullTblName() throws Exception {
     try {
       createTable4PartColsParts(client);
@@ -792,7 +792,7 @@ public class TestListPartitions extends MetaStoreClientTest {
     client.listPartitionsByFilter(DB_NAME, TABLE_NAME, "yyyy=\"2017\"", (short)-1);
   }
 
-  @Test
+  @Test(expected = MetaException.class)
   public void testListPartitionsByFilterNullTblName() throws Exception {
     try {
       createTable4PartColsParts(client);
@@ -803,7 +803,7 @@ public class TestListPartitions extends MetaStoreClientTest {
     }
   }
 
-  @Test
+  @Test(expected = MetaException.class)
   public void testListPartitionsByFilterNullDbName() throws Exception {
     try {
       createTable4PartColsParts(client);
@@ -1038,30 +1038,31 @@ public class TestListPartitions extends MetaStoreClientTest {
 
   }
 
-  @Test(expected = NoSuchObjectException.class)
+  @Test(expected = MetaException.class)
   public void testListPartitionNamesNoDbName() throws Exception {
     createTable4PartColsParts(client);
     client.listPartitionNames("", TABLE_NAME, (short)-1);
   }
 
-  @Test(expected = NoSuchObjectException.class)
+  @Test(expected = MetaException.class)
   public void testListPartitionNamesNoTblName() throws Exception {
     createTable4PartColsParts(client);
     client.listPartitionNames(DB_NAME, "", (short)-1);
   }
 
-  @Test(expected = NoSuchObjectException.class)
+  @Test
   public void testListPartitionNamesNoTable() throws Exception {
-    client.listPartitionNames(DB_NAME, TABLE_NAME, (short)-1);
+    List<String> names = client.listPartitionNames(DB_NAME, TABLE_NAME, (short)-1);
+    Assert.assertEquals(0, names.size());
   }
 
-  @Test(expected = NoSuchObjectException.class)
+  @Test
   public void testListPartitionNamesNoDb() throws Exception {
     client.dropDatabase(DB_NAME);
     client.listPartitionNames(DB_NAME, TABLE_NAME, (short)-1);
   }
 
-  @Test
+  @Test(expected = MetaException.class)
   public void testListPartitionNamesNullDbName() throws Exception {
     try {
       createTable4PartColsParts(client);
@@ -1072,7 +1073,7 @@ public class TestListPartitions extends MetaStoreClientTest {
     }
   }
 
-  @Test
+  @Test(expected = MetaException.class)
   public void testListPartitionNamesNullTblName() throws Exception {
     try {
       createTable4PartColsParts(client);
@@ -1164,7 +1165,7 @@ public class TestListPartitions extends MetaStoreClientTest {
     client.listPartitionNames(DB_NAME, TABLE_NAME, Lists.newArrayList("2017"), (short)-1);
   }
 
-  @Test
+  @Test(expected = MetaException.class)
   public void testListPartitionNamesByValuesNullDbName() throws Exception {
     try {
       createTable4PartColsParts(client);
@@ -1175,7 +1176,7 @@ public class TestListPartitions extends MetaStoreClientTest {
     }
   }
 
-  @Test
+  @Test(expected = MetaException.class)
   public void testListPartitionNamesByValuesNullTblName() throws Exception {
     try {
       createTable4PartColsParts(client);
@@ -1439,10 +1440,11 @@ public class TestListPartitions extends MetaStoreClientTest {
     client.getNumPartitionsByFilter("bogus", DB_NAME, TABLE_NAME, "partcol=\"a0\"");
   }
 
-  @Test(expected = NoSuchObjectException.class)
+  @Test
   public void listPartitionNamesBogusCatalog() throws TException {
     createTable3PartCols1Part(client);
-    client.listPartitionNames("bogus", DB_NAME, TABLE_NAME, -1);
+    List<String> parts = client.listPartitionNames("bogus", DB_NAME, TABLE_NAME, -1);
+    Assert.assertEquals(0, parts.size());
   }
 
   @Test(expected = NoSuchObjectException.class)
