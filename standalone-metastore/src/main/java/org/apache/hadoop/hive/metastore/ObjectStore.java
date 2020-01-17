@@ -2140,7 +2140,7 @@ public class ObjectStore implements RawStore, Configurable {
   private List<FieldSchema> convertToFieldSchemas(List<MFieldSchema> mkeys) {
     List<FieldSchema> keys = null;
     if (mkeys != null) {
-      keys = new ArrayList<>(mkeys.size());
+      keys = new ArrayList<>();
       for (MFieldSchema part : mkeys) {
         keys.add(new FieldSchema(part.getName(), part.getType(), part
             .getComment()));
@@ -2152,7 +2152,7 @@ public class ObjectStore implements RawStore, Configurable {
   private List<MOrder> convertToMOrders(List<Order> keys) {
     List<MOrder> mkeys = null;
     if (keys != null) {
-      mkeys = new ArrayList<>(keys.size());
+      mkeys = new ArrayList<>();
       for (Order part : keys) {
         mkeys.add(new MOrder(normalizeIdentifier(part.getCol()), part.getOrder()));
       }
@@ -2163,7 +2163,7 @@ public class ObjectStore implements RawStore, Configurable {
   private List<Order> convertToOrders(List<MOrder> mkeys) {
     List<Order> keys = null;
     if (mkeys != null) {
-      keys = new ArrayList<>(mkeys.size());
+      keys = new ArrayList<>();
       for (MOrder part : mkeys) {
         keys.add(new Order(part.getCol(), part.getOrder()));
       }
@@ -2250,7 +2250,7 @@ public class ObjectStore implements RawStore, Configurable {
   private List<List<String>> convertToSkewedValues(List<MStringList> mLists) {
     List<List<String>> lists = null;
     if (mLists != null) {
-      lists = new ArrayList<>(mLists.size());
+      lists = new ArrayList<>();
       for (MStringList element : mLists) {
         lists.add(new ArrayList<>(element.getInternalList()));
       }
@@ -2277,7 +2277,7 @@ public class ObjectStore implements RawStore, Configurable {
   private Map<List<String>, String> covertToSkewedMap(Map<MStringList, String> mMap) {
     Map<List<String>, String> map = null;
     if (mMap != null) {
-      map = new HashMap<>(mMap.size());
+      map = new HashMap<>();
       Set<MStringList> keys = mMap.keySet();
       for (MStringList key : keys) {
         map.put(new ArrayList<>(key.getInternalList()), mMap.get(key));
@@ -2294,7 +2294,7 @@ public class ObjectStore implements RawStore, Configurable {
   private Map<MStringList, String> covertToMapMStringList(Map<List<String>, String> mMap) {
     Map<MStringList, String> map = null;
     if (mMap != null) {
-      map = new HashMap<>(mMap.size());
+      map = new HashMap<>();
       Set<List<String>> keys = mMap.keySet();
       for (List<String> key : keys) {
         map.put(new MStringList(key), mMap.get(key));
