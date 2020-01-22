@@ -4,7 +4,7 @@ CREATE TABLE t1_multi_delimit(colA int,
   colC timestamp,
   colD smallint,
   colE smallint)
-ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.MultiDelimitSerDe'
+ROW FORMAT SERDE 'org.apache.hadoop.hive.contrib.serde2.MultiDelimitSerDe'
 WITH SERDEPROPERTIES ("field.delim"="^,")STORED AS TEXTFILE;
 
 LOAD DATA LOCAL INPATH "../../data/files/t1_multi_delimit.csv" INTO TABLE t1_multi_delimit;
@@ -26,11 +26,12 @@ SELECT * FROM t11_csv_serde;
 
 -- there should not be any difference between MultiDelimitSerDe table and OpenCSVSerde table results
 
-SELECT EXISTS (
+SELECT count(*)<>10
+FROM (
 SELECT colA, colB, colC, colD, colE FROM t1_multi_delimit
-MINUS
+UNION
 SELECT cast(colA as int), cast(colB as tinyint), cast(colC as timestamp), cast(colD as smallint), cast(colE as smallint) FROM t11_csv_serde
-);
+) a;
 
 -- in this table, file having extra column is loaded
 CREATE TABLE t2_multi_delimit(colA int,
@@ -38,7 +39,7 @@ CREATE TABLE t2_multi_delimit(colA int,
   colC timestamp,
   colD smallint,
   colE smallint)
-ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.MultiDelimitSerDe'
+ROW FORMAT SERDE 'org.apache.hadoop.hive.contrib.serde2.MultiDelimitSerDe'
 WITH SERDEPROPERTIES ("field.delim"="^,")STORED AS TEXTFILE;
 
 LOAD DATA LOCAL INPATH "../../data/files/t2_multi_delimit.csv" INTO TABLE t2_multi_delimit;
@@ -51,7 +52,7 @@ CREATE TABLE t3_multi_delimit(colA int,
   colC timestamp,
   colD smallint,
   colE smallint)
-ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.MultiDelimitSerDe'
+ROW FORMAT SERDE 'org.apache.hadoop.hive.contrib.serde2.MultiDelimitSerDe'
 WITH SERDEPROPERTIES ("field.delim"="^^^^^")STORED AS TEXTFILE;
 
 LOAD DATA LOCAL INPATH "../../data/files/t3_multi_delimit.csv" INTO TABLE t3_multi_delimit;

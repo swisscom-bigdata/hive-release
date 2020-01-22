@@ -1,19 +1,21 @@
-PREHOOK: query: CREATE TABLE t1_multi_delimit(colA int,
+PREHOOK: query: -- in this table, rows of different lengths(different number of columns) are loaded
+CREATE TABLE t1_multi_delimit(colA int,
   colB tinyint,
   colC timestamp,
   colD smallint,
   colE smallint)
-ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.MultiDelimitSerDe'
+ROW FORMAT SERDE 'org.apache.hadoop.hive.contrib.serde2.MultiDelimitSerDe'
 WITH SERDEPROPERTIES ("field.delim"="^,")STORED AS TEXTFILE
 PREHOOK: type: CREATETABLE
 PREHOOK: Output: database:default
 PREHOOK: Output: default@t1_multi_delimit
-POSTHOOK: query: CREATE TABLE t1_multi_delimit(colA int,
+POSTHOOK: query: -- in this table, rows of different lengths(different number of columns) are loaded
+CREATE TABLE t1_multi_delimit(colA int,
   colB tinyint,
   colC timestamp,
   colD smallint,
   colE smallint)
-ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.MultiDelimitSerDe'
+ROW FORMAT SERDE 'org.apache.hadoop.hive.contrib.serde2.MultiDelimitSerDe'
 WITH SERDEPROPERTIES ("field.delim"="^,")STORED AS TEXTFILE
 POSTHOOK: type: CREATETABLE
 POSTHOOK: Output: database:default
@@ -44,7 +46,8 @@ NULL	NULL	NULL	NULL	NULL
 8	8	NULL	8	8
 9	9	NULL	9	9
 10101010	NULL	NULL	NULL	NULL
-PREHOOK: query: CREATE TABLE t11_csv_serde(colA int,
+PREHOOK: query: -- in this table, rows of different lengths(different number of columns) and it uses csv serde
+CREATE TABLE t11_csv_serde(colA int,
   colB tinyint,
   colC timestamp,
   colD smallint,
@@ -54,7 +57,8 @@ WITH SERDEPROPERTIES ("separatorChar" = ",")STORED AS TEXTFILE
 PREHOOK: type: CREATETABLE
 PREHOOK: Output: database:default
 PREHOOK: Output: default@t11_csv_serde
-POSTHOOK: query: CREATE TABLE t11_csv_serde(colA int,
+POSTHOOK: query: -- in this table, rows of different lengths(different number of columns) and it uses csv serde
+CREATE TABLE t11_csv_serde(colA int,
   colB tinyint,
   colC timestamp,
   colD smallint,
@@ -90,44 +94,49 @@ NULL	NULL	NULL	NULL	NULL
 8	8		8	8
 9	9		9	9
 10101010	NULL	NULL	NULL	NULL
-Warning: Shuffle Join JOIN[30][tables = [$hdt$_0, $hdt$_1]] in Stage 'Stage-1:MAPRED' is a cross product
-PREHOOK: query: SELECT EXISTS (
+PREHOOK: query: -- there should not be any difference between MultiDelimitSerDe table and OpenCSVSerde table results
+
+SELECT count(*)<>10
+FROM (
 SELECT colA, colB, colC, colD, colE FROM t1_multi_delimit
-MINUS
+UNION
 SELECT cast(colA as int), cast(colB as tinyint), cast(colC as timestamp), cast(colD as smallint), cast(colE as smallint) FROM t11_csv_serde
-)
+) a
 PREHOOK: type: QUERY
-PREHOOK: Input: _dummy_database@_dummy_table
 PREHOOK: Input: default@t11_csv_serde
 PREHOOK: Input: default@t1_multi_delimit
 #### A masked pattern was here ####
-POSTHOOK: query: SELECT EXISTS (
+POSTHOOK: query: -- there should not be any difference between MultiDelimitSerDe table and OpenCSVSerde table results
+
+SELECT count(*)<>10
+FROM (
 SELECT colA, colB, colC, colD, colE FROM t1_multi_delimit
-MINUS
+UNION
 SELECT cast(colA as int), cast(colB as tinyint), cast(colC as timestamp), cast(colD as smallint), cast(colE as smallint) FROM t11_csv_serde
-)
+) a
 POSTHOOK: type: QUERY
-POSTHOOK: Input: _dummy_database@_dummy_table
 POSTHOOK: Input: default@t11_csv_serde
 POSTHOOK: Input: default@t1_multi_delimit
 #### A masked pattern was here ####
 false
-PREHOOK: query: CREATE TABLE t2_multi_delimit(colA int,
+PREHOOK: query: -- in this table, file having extra column is loaded
+CREATE TABLE t2_multi_delimit(colA int,
   colB tinyint,
   colC timestamp,
   colD smallint,
   colE smallint)
-ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.MultiDelimitSerDe'
+ROW FORMAT SERDE 'org.apache.hadoop.hive.contrib.serde2.MultiDelimitSerDe'
 WITH SERDEPROPERTIES ("field.delim"="^,")STORED AS TEXTFILE
 PREHOOK: type: CREATETABLE
 PREHOOK: Output: database:default
 PREHOOK: Output: default@t2_multi_delimit
-POSTHOOK: query: CREATE TABLE t2_multi_delimit(colA int,
+POSTHOOK: query: -- in this table, file having extra column is loaded
+CREATE TABLE t2_multi_delimit(colA int,
   colB tinyint,
   colC timestamp,
   colD smallint,
   colE smallint)
-ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.MultiDelimitSerDe'
+ROW FORMAT SERDE 'org.apache.hadoop.hive.contrib.serde2.MultiDelimitSerDe'
 WITH SERDEPROPERTIES ("field.delim"="^,")STORED AS TEXTFILE
 POSTHOOK: type: CREATETABLE
 POSTHOOK: Output: database:default
@@ -152,22 +161,24 @@ POSTHOOK: Input: default@t2_multi_delimit
 2	1	NULL	0	1
 3	1	NULL	0	0
 4	1	NULL	0	1
-PREHOOK: query: CREATE TABLE t3_multi_delimit(colA int,
+PREHOOK: query: -- in this table, delimiter of 5 characters is used
+CREATE TABLE t3_multi_delimit(colA int,
   colB tinyint,
   colC timestamp,
   colD smallint,
   colE smallint)
-ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.MultiDelimitSerDe'
+ROW FORMAT SERDE 'org.apache.hadoop.hive.contrib.serde2.MultiDelimitSerDe'
 WITH SERDEPROPERTIES ("field.delim"="^^^^^")STORED AS TEXTFILE
 PREHOOK: type: CREATETABLE
 PREHOOK: Output: database:default
 PREHOOK: Output: default@t3_multi_delimit
-POSTHOOK: query: CREATE TABLE t3_multi_delimit(colA int,
+POSTHOOK: query: -- in this table, delimiter of 5 characters is used
+CREATE TABLE t3_multi_delimit(colA int,
   colB tinyint,
   colC timestamp,
   colD smallint,
   colE smallint)
-ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.MultiDelimitSerDe'
+ROW FORMAT SERDE 'org.apache.hadoop.hive.contrib.serde2.MultiDelimitSerDe'
 WITH SERDEPROPERTIES ("field.delim"="^^^^^")STORED AS TEXTFILE
 POSTHOOK: type: CREATETABLE
 POSTHOOK: Output: database:default
