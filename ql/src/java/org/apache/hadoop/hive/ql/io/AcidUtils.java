@@ -1247,6 +1247,11 @@ public class AcidUtils {
       //By definition there are no open txns with id < 1.
       return true;
     }
+
+    if (writeIdList.getMinOpenWriteId() != null && baseWriteId <= writeIdList.getMinOpenWriteId()) {
+      return true;
+    }
+
     if(!MetaDataFile.isCompacted(baseDir, fs)) {
       //this is the IOW case
       return writeIdList.isWriteIdValid(baseWriteId);
