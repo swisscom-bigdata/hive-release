@@ -363,30 +363,30 @@ public class TestGetPartitions extends MetaStoreClientTest {
     assertEquals(0, partitions.size());
   }
 
-  @Test(expected = NoSuchObjectException.class)
+  @Test
   public void testGetPartitionsByNamesNoDbName() throws Exception {
     createTable3PartCols1Part(client);
     client.getPartitionsByNames("", TABLE_NAME, Lists.newArrayList("yyyy=2000/mm=01/dd=02"));
   }
 
-  @Test(expected = NoSuchObjectException.class)
+  @Test
   public void testGetPartitionsByNamesNoTblName() throws Exception {
     createTable3PartCols1Part(client);
     client.getPartitionsByNames(DB_NAME, "", Lists.newArrayList("yyyy=2000/mm=01/dd=02"));
   }
 
-  @Test(expected = TException.class)
+  @Test
   public void testGetPartitionsByNamesNoTable() throws Exception {
     client.getPartitionsByNames(DB_NAME, TABLE_NAME, Lists.newArrayList("yyyy=2000/mm=01/dd=02"));
   }
 
-  @Test(expected = TException.class)
+  @Test
   public void testGetPartitionsByNamesNoDb() throws Exception {
     client.dropDatabase(DB_NAME);
     client.getPartitionsByNames(DB_NAME, TABLE_NAME, Lists.newArrayList("yyyy=2000/mm=01/dd=02"));
   }
 
-  @Test
+  @Test(expected = MetaException.class)
   public void testGetPartitionsByNamesNullDbName() throws Exception {
     try {
       createTable3PartCols1Part(client);
@@ -397,7 +397,7 @@ public class TestGetPartitions extends MetaStoreClientTest {
     }
   }
 
-  @Test
+  @Test(expected = MetaException.class)
   public void testGetPartitionsByNamesNullTblName() throws Exception {
     try {
       createTable3PartCols1Part(client);
@@ -594,7 +594,7 @@ public class TestGetPartitions extends MetaStoreClientTest {
         Lists.newArrayList("1997", "05", "16"), "user0", Lists.newArrayList("group0"));
   }
 
-  @Test(expected = TException.class)
+  @Test
   public void getPartitionsByNamesBogusCatalog() throws TException {
     createTable3PartCols1Part(client);
     client.getPartitionsByNames("bogus", DB_NAME, TABLE_NAME,

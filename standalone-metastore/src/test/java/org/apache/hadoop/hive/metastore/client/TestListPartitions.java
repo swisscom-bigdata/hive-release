@@ -298,7 +298,7 @@ public class TestListPartitions extends MetaStoreClientTest {
     client.listPartitions(DB_NAME, "", (short)-1);
   }
 
-  @Test(expected = MetaException.class)
+  @Test
   public void testListPartitionsAllNullTblName() throws Exception {
     try {
       createTable3PartCols1Part(client);
@@ -792,7 +792,7 @@ public class TestListPartitions extends MetaStoreClientTest {
     client.listPartitionsByFilter(DB_NAME, TABLE_NAME, "yyyy=\"2017\"", (short)-1);
   }
 
-  @Test(expected = MetaException.class)
+  @Test
   public void testListPartitionsByFilterNullTblName() throws Exception {
     try {
       createTable4PartColsParts(client);
@@ -1038,13 +1038,13 @@ public class TestListPartitions extends MetaStoreClientTest {
 
   }
 
-  @Test(expected = MetaException.class)
+  @Test
   public void testListPartitionNamesNoDbName() throws Exception {
     createTable4PartColsParts(client);
     client.listPartitionNames("", TABLE_NAME, (short)-1);
   }
 
-  @Test(expected = MetaException.class)
+  @Test
   public void testListPartitionNamesNoTblName() throws Exception {
     createTable4PartColsParts(client);
     client.listPartitionNames(DB_NAME, "", (short)-1);
