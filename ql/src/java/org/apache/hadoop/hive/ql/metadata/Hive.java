@@ -2480,8 +2480,6 @@ private void constructOneLBLocationMap(FileStatus fSta,
     // for each dynamically created DP directory, construct a full partition spec
     // and load the partition based on that
     final Map<Long, RawStore> rawStoreMap = new ConcurrentHashMap<>();
-    boolean isTxnTable = AcidUtils.isTransactionalTable(tbl);
-
     try {
       for(final Path partPath : validPartitions) {
         // generate a full partition specification
@@ -2562,7 +2560,7 @@ private void constructOneLBLocationMap(FileStatus fSta,
     }
 
     try {
-      if (isTxnTable) {
+      if (isAcid) {
         List<String> partNames = new ArrayList<>(partitionsMap.size());
         for (Partition p : partitionsMap.values()) {
           partNames.add(p.getName());
