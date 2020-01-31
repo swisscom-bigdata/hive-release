@@ -2613,13 +2613,7 @@ public class HiveMetaStoreClient implements IMetaStoreClient, AutoCloseable {
 
   @Override
   public long openTxn(String user) throws TException {
-    OpenTxnsResponse txns = openTxnsIntr(user, 1, null, null, null);
-    return txns.getTxn_ids().get(0);
-  }
-
-  @Override
-  public long openTxn(String user, TxnType txnType) throws TException {
-    OpenTxnsResponse txns = openTxnsIntr(user, 1, null, null, txnType);
+    OpenTxnsResponse txns = openTxnsIntr(user, 1, null, null);
     return txns.getTxn_ids().get(0);
   }
 
@@ -2627,17 +2621,17 @@ public class HiveMetaStoreClient implements IMetaStoreClient, AutoCloseable {
   public List<Long> replOpenTxn(String replPolicy, List<Long> srcTxnIds, String user) throws TException {
     // As this is called from replication task, the user is the user who has fired the repl command.
     // This is required for standalone metastore authentication.
-    OpenTxnsResponse txns = openTxnsIntr(user, srcTxnIds != null ? srcTxnIds.size() : 1, replPolicy, srcTxnIds, null);
+    OpenTxnsResponse txns = openTxnsIntr(user, srcTxnIds != null ? srcTxnIds.size() : 1, replPolicy, srcTxnIds);
     return txns.getTxn_ids();
   }
 
   @Override
   public OpenTxnsResponse openTxns(String user, int numTxns) throws TException {
-    return openTxnsIntr(user, numTxns, null, null, null);
+    return openTxnsIntr(user, numTxns, null, null);
   }
 
   private OpenTxnsResponse openTxnsIntr(String user, int numTxns, String replPolicy,
-                                        List<Long> srcTxnIds, TxnType txnType) throws TException {
+                                        List<Long> srcTxnIds) throws TException {
     String hostname;
     try {
       hostname = InetAddress.getLocalHost().getHostName();
@@ -2654,9 +2648,6 @@ public class HiveMetaStoreClient implements IMetaStoreClient, AutoCloseable {
       rqst.setReplSrcTxnIds(srcTxnIds);
     } else {
       assert srcTxnIds == null;
-    }
-    if(txnType != null) {
-      rqst.setTxn_type(txnType);
     }
     return client.open_txns(rqst);
   }

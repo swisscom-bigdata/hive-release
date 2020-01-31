@@ -23,8 +23,6 @@ import org.apache.hadoop.hive.metastore.api.MetaException;
 import org.apache.hadoop.hive.metastore.api.Partition;
 import org.apache.hadoop.hive.metastore.api.StorageDescriptor;
 import org.apache.hadoop.hive.metastore.api.Table;
-import org.apache.hadoop.hive.metastore.api.TxnType;
-import org.apache.hadoop.hive.metastore.conf.MetastoreConf;
 import org.apache.hadoop.mapred.JobConf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,8 +38,6 @@ import org.apache.hadoop.hive.ql.session.SessionState;
 import org.apache.hadoop.hive.ql.stats.StatsUtils;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.hadoop.util.StringUtils;
-import org.apache.hadoop.hive.metastore.IMetaStoreClient;
-import org.apache.hadoop.hive.metastore.HiveMetaStoreUtils;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -61,8 +57,6 @@ public class Worker extends CompactorThread {
   static final private Logger LOG = LoggerFactory.getLogger(CLASS_NAME);
   static final private long SLEEP_TIME = 5000;
   static final private int baseThreadNum = 10002;
-
-  protected IMetaStoreClient msc;
 
   private String name;
   private JobConf mrJob; // the MR job for compaction
@@ -144,16 +138,12 @@ public class Worker extends CompactorThread {
           txnHandler.markCleaned(ci);
           continue;
         }
-        String fullTableName = TxnUtils.getFullTableName(t.getDbName(), t.getTableName());
-        if (ci.runAs == null) {
-          ci.runAs = findUserToRunAs(sd.getLocation(), t);
-        }
-        long compactorTxnId = msc.openTxn(ci.runAs, TxnType.COMPACTION);
 
         final boolean isMajor = ci.isMajorCompaction();
 
         // Compaction doesn't work under a transaction and hence pass 0 for current txn Id
         // The response will have one entry per table and hence we get only one OpenWriteIds
+        String fullTableName = TxnUtils.getFullTableName(t.getDbName(), t.getTableName());
         GetValidWriteIdsRequest rqst = new GetValidWriteIdsRequest(Collections.singletonList(fullTableName));
         final ValidWriteIdList tblValidWriteIds =
                 TxnUtils.createValidCompactWriteIdList(txnHandler.getValidWriteIds(rqst).getTblValidWriteIds().get(0));
@@ -229,11 +219,6 @@ public class Worker extends CompactorThread {
   @Override
   public void init(AtomicBoolean stop, AtomicBoolean looped) throws MetaException {
     super.init(stop, looped);
-    try {
-      this.msc = HiveMetaStoreUtils.getHiveMetastoreClient(conf);
-    } catch (IOException e) {
-      throw new MetaException(e.getMessage());
-    }
 
     StringBuilder name = new StringBuilder(hostname());
     name.append("-");
