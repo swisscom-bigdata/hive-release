@@ -21,7 +21,6 @@ package org.apache.hadoop.hive.metastore.events;
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.hive.metastore.IHMSHandler;
-import org.apache.hadoop.hive.metastore.api.TxnType;
 
 /**
  * AbortTxnEvent
@@ -32,25 +31,15 @@ import org.apache.hadoop.hive.metastore.api.TxnType;
 public class AbortTxnEvent extends ListenerEvent {
 
   private final Long txnId;
-  private final TxnType txnType;
-
-  public AbortTxnEvent(Long transactionId, IHMSHandler handler) {
-    this(transactionId, null, handler);
-  }
-
-  public AbortTxnEvent(Long transactionId, TxnType txnType) {
-    this(transactionId, txnType, null);
-  }
 
   /**
+   *
    * @param transactionId Unique identification for the transaction that got rolledback.
-   * @param txnType type of transaction
    * @param handler handler that is firing the event
    */
-  public AbortTxnEvent(Long transactionId, TxnType txnType, IHMSHandler handler) {
+  public AbortTxnEvent(Long transactionId, IHMSHandler handler) {
     super(true, handler);
-    this.txnId = transactionId;
-    this.txnType = txnType;
+    txnId = transactionId;
   }
 
   /**
@@ -58,12 +47,5 @@ public class AbortTxnEvent extends ListenerEvent {
    */
   public Long getTxnId() {
     return txnId;
-  }
-
-  /**
-   * @return txnType
-   */
-  public TxnType getTxnType() {
-    return txnType;
   }
 }

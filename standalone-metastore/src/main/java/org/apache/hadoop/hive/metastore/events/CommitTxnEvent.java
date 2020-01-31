@@ -21,7 +21,6 @@ package org.apache.hadoop.hive.metastore.events;
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.hive.metastore.IHMSHandler;
-import org.apache.hadoop.hive.metastore.api.TxnType;
 
 /**
  * CommitTxnEvent
@@ -32,25 +31,15 @@ import org.apache.hadoop.hive.metastore.api.TxnType;
 public class CommitTxnEvent extends ListenerEvent {
 
   private final Long txnId;
-  private final TxnType txnType;
-
-  public CommitTxnEvent(Long transactionId, IHMSHandler handler) {
-    this(transactionId, null, handler);
-  }
-
-  public CommitTxnEvent(Long transactionId, TxnType txnType) {
-    this(transactionId, txnType, null);
-  }
 
   /**
+   *
    * @param transactionId Unique identification for the transaction just got committed.
-   * @param txnType type of transaction
    * @param handler handler that is firing the event
    */
-  public CommitTxnEvent(Long transactionId, TxnType txnType, IHMSHandler handler) {
+  public CommitTxnEvent(Long transactionId, IHMSHandler handler) {
     super(true, handler);
     this.txnId = transactionId;
-    this.txnType = txnType;
   }
 
   /**
@@ -58,12 +47,5 @@ public class CommitTxnEvent extends ListenerEvent {
    */
   public Long getTxnId() {
     return txnId;
-  }
-
-  /**
-   * @return txnType
-   */
-  public TxnType getTxnType() {
-    return txnType;
   }
 }

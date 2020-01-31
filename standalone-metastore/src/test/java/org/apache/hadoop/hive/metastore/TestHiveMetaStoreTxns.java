@@ -39,11 +39,6 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
 import java.util.List;
-import java.sql.Statement;
-import java.sql.ResultSet;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Connection;
 
 /**
  * Unit tests for {@link org.apache.hadoop.hive.metastore.HiveMetaStoreClient}.  For now this just has
@@ -62,7 +57,6 @@ public class TestHiveMetaStoreTxns {
 
   private final Configuration conf = MetastoreConf.newMetastoreConf();
   private IMetaStoreClient client;
-  private Connection conn;
 
   @Test
   public void testTxns() throws Exception {
@@ -271,29 +265,16 @@ public class TestHiveMetaStoreTxns {
     Assert.assertTrue(validTxns.isTxnValid(txnId));
   }
 
-  @Test
-  public void testTxnTypePersisted() throws Exception {
-    long txnId = client.openTxn("me", TxnType.READ_ONLY);
-    Statement stm = conn.createStatement();
-    ResultSet rs = stm.executeQuery("SELECT txn_type FROM TXNS WHERE txn_id = " + txnId);
-    Assert.assertTrue(rs.next());
-    Assert.assertEquals(TxnType.findByValue(rs.getInt(1)), TxnType.READ_ONLY);
-  }
-
   @Before
   public void setUp() throws Exception {
     MetaStoreTestUtils.setConfForStandloneMode(conf);
     TxnDbUtil.setConfValues(conf);
     TxnDbUtil.prepDb(conf);
     client = new HiveMetaStoreClient(conf);
-    String connectionStr = MetastoreConf.getVar(conf, MetastoreConf.ConfVars.CONNECT_URL_KEY);
-
-    conn = DriverManager.getConnection(connectionStr);
   }
 
   @After
   public void tearDown() throws Exception {
-    conn.close();
     TxnDbUtil.cleanDb(conf);
   }
 }
