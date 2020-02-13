@@ -109,6 +109,17 @@ public class ReplDumpTask extends Task<ReplDumpWork> implements Serializable {
     Utils.writeOutput(values, new Path(work.resultTempPath), conf);
   }
 
+  /**
+   * Decide whether to dump external tables data. If external tables are enabled for replication,
+   * then need to dump it's data in all the incremental dumps.
+   * @return true if need to dump external table data and false if not.
+   */
+  private boolean shouldDumpExternalTableLocation() {
+    return conf.getBoolVar(HiveConf.ConfVars.REPL_INCLUDE_EXTERNAL_TABLES)
+            && (!conf.getBoolVar(HiveConf.ConfVars.REPL_DUMP_METADATA_ONLY)
+            && !conf.getBoolVar(HiveConf.ConfVars.REPL_DUMP_METADATA_ONLY_FOR_EXTERNAL_TABLE));
+  }
+
   private Long incrementalDump(Path dumpRoot, DumpMetaData dmd, Path cmRoot, Hive hiveDb) throws Exception {
     Long lastReplId;// get list of events matching dbPattern & tblPattern
     // go through each event, and dump out each event to a event-level dump dir inside dumproot
@@ -237,9 +248,6 @@ public class ReplDumpTask extends Task<ReplDumpWork> implements Serializable {
 
       String uniqueKey = Utils.setDbBootstrapDumpState(hiveDb, dbName);
       Exception caught = null;
-      boolean shouldWriteExternalTableLocationInfo =
-              conf.getBoolVar(HiveConf.ConfVars.REPL_INCLUDE_EXTERNAL_TABLES)
-                      && !conf.getBoolVar(HiveConf.ConfVars.REPL_DUMP_METADATA_ONLY);
       try (Writer writer = new Writer(dbRoot, conf)) {
         for (String tblName : Utils.matchesTbl(hiveDb, dbName, work.tableNameOrPattern)) {
           LOG.debug(
@@ -247,7 +255,7 @@ public class ReplDumpTask extends Task<ReplDumpWork> implements Serializable {
           try {
             HiveWrapper.Tuple<Table> tableTuple = new HiveWrapper(hiveDb, dbName).table(tblName,
                                                                                         conf);
-            if (shouldWriteExternalTableLocationInfo
+            if (shouldDumpExternalTableLocation()
                     && TableType.EXTERNAL_TABLE.equals(tableTuple.object.getTableType())) {
               LOG.debug("Adding table {} to external tables list", tblName);
               writer.dataLocationDump(tableTuple.object);
@@ -311,6 +319,7 @@ public class ReplDumpTask extends Task<ReplDumpWork> implements Serializable {
           new TableExport.Paths(work.astRepresentationForErrorMsg, dbRoot, tblName, conf);
     String distCpDoAsUser = conf.getVar(HiveConf.ConfVars.HIVE_DISTCP_DOAS_USER);
     tuple.replicationSpec.setIsReplace(true);  // by default for all other objects this is false
+    tuple.replicationSpec.setRepl(true);
     new TableExport(exportPaths, tableSpec, tuple.replicationSpec, hiveDb, distCpDoAsUser, conf).write();
 
     replLogger.tableLog(tblName, tableSpec.tableHandle.getTableType());

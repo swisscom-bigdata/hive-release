@@ -23,6 +23,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.common.FileUtils;
 import org.apache.hadoop.hive.conf.HiveConf;
+import org.apache.hadoop.hive.metastore.TableType;
 import org.apache.hadoop.hive.shims.HadoopShims.HdfsFileStatus;
 import org.apache.hadoop.hive.metastore.api.NoSuchObjectException;
 import org.apache.hadoop.hive.ql.ErrorMsg;
@@ -72,8 +73,9 @@ public class TableExport {
         ? null
         : tableSpec;
     this.replicationSpec = replicationSpec;
-    if (conf.getBoolVar(HiveConf.ConfVars.REPL_DUMP_METADATA_ONLY) ||
-            (this.tableSpec != null && this.tableSpec.tableHandle.isView())) {
+    if (this.tableSpec != null && this.tableSpec.tableHandle!=null
+            && (this.tableSpec.tableHandle.isView()
+            || Utils.shouldDumpMetaDataOnly(this.tableSpec.tableHandle, conf))) {
       this.replicationSpec.setIsMetadataOnly(true);
 
       this.tableSpec.tableHandle.setStatsStateLikeNewTable();
@@ -91,7 +93,9 @@ public class TableExport {
     } else if (shouldExport()) {
       PartitionIterable withPartitions = getPartitions();
       writeMetaData(withPartitions);
-      if (!replicationSpec.isMetadataOnly()) {
+      if (!replicationSpec.isMetadataOnly()
+              && !(replicationSpec.isRepl()
+              && tableSpec.tableHandle.getTableType().equals(TableType.EXTERNAL_TABLE)))  {
         writeData(withPartitions);
       }
       return true;

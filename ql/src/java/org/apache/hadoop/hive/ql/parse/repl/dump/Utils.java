@@ -20,6 +20,7 @@ package org.apache.hadoop.hive.ql.parse.repl.dump;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.conf.HiveConf;
+import org.apache.hadoop.hive.metastore.TableType;
 import org.apache.hadoop.hive.metastore.api.Database;
 import org.apache.hadoop.hive.metastore.api.NotificationEvent;
 import org.apache.hadoop.hive.ql.exec.Utilities;
@@ -214,5 +215,12 @@ public class Utils {
       return false;
     }
     return shouldReplicate(replicationSpec, table, isEventDump, hiveConf);
+  }
+
+  public static boolean shouldDumpMetaDataOnly(Table table, HiveConf conf) {
+    return conf.getBoolVar(HiveConf.ConfVars.REPL_DUMP_METADATA_ONLY) ||
+            (conf.getBoolVar(HiveConf.ConfVars.REPL_INCLUDE_EXTERNAL_TABLES) &&
+                    table.getTableType().equals(TableType.EXTERNAL_TABLE) &&
+                    conf.getBoolVar(HiveConf.ConfVars.REPL_DUMP_METADATA_ONLY_FOR_EXTERNAL_TABLE));
   }
 }

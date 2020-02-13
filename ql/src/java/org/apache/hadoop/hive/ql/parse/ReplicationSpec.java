@@ -44,6 +44,8 @@ public class ReplicationSpec {
   private boolean isLazy = false; // lazy mode => we only list files, and expect that the eventual copy will pull data in.
   private boolean isReplace = true; // default is that the import mode is insert overwrite
   private Type specType = Type.DEFAULT; // DEFAULT means REPL_LOAD or BOOTSTRAP_DUMP or EXPORT
+  //Determine if replication is done using repl or export-import
+  private boolean isRepl = false;
 
   // Key definitions related to replication
   public enum KEY {
@@ -360,5 +362,13 @@ public class ReplicationSpec {
     } else {
       return SCOPE.NO_REPL;
     }
+  }
+
+  public boolean isRepl() {
+    return isRepl;
+  }
+
+  public void setRepl(boolean repl) {
+    isRepl = repl;
   }
 }
