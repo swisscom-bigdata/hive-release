@@ -46,7 +46,7 @@ STAGE PLANS:
             alias: lineitem
             Statistics: Num rows: 100 Data size: 11999 Basic stats: COMPLETE Column stats: NONE
             Filter Operator
-              predicate: ((l_shipmode = 'RAIL') is true and NVL((DATE'1996-03-30' = to_date(CAST( l_shipdate AS TIMESTAMP))),false)) (type: boolean)
+              predicate: ((l_shipmode = 'RAIL') is true and COALESCE((DATE'1996-03-30' = to_date(CAST( l_shipdate AS TIMESTAMP))),false)) (type: boolean)
               Statistics: Num rows: 25 Data size: 2999 Basic stats: COMPLETE Column stats: NONE
               Select Operator
                 expressions: l_orderkey (type: int), (UDFToDouble(l_partkey) / 1000000.0D) (type: double)
