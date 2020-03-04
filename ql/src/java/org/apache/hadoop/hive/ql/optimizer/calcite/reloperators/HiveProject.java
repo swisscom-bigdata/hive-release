@@ -32,6 +32,7 @@ import org.apache.calcite.rel.type.RelDataTypeField;
 import org.apache.calcite.rex.RexBuilder;
 import org.apache.calcite.rex.RexNode;
 import org.apache.calcite.rex.RexUtil;
+import org.apache.calcite.rex.RexOver;
 import org.apache.calcite.util.Util;
 import org.apache.calcite.util.mapping.Mapping;
 import org.apache.calcite.util.mapping.MappingType;
@@ -80,7 +81,7 @@ public class HiveProject extends Project implements HiveRelNode {
    *          aliases of the expressions
    */
   public static HiveProject create(RelNode child, List<? extends RexNode> exps,
-    List<String> fieldNames) throws CalciteSemanticException{
+      List<String> fieldNames) throws CalciteSemanticException{
     RelOptCluster cluster = child.getCluster();
 
     // 1 Ensure columnNames are unique - CALCITE-411
@@ -196,6 +197,10 @@ public class HiveProject extends Project implements HiveRelNode {
       return ((HiveRelShuttle)shuttle).visit(this);
     }
     return shuttle.visit(this);
+  }
+
+  public boolean containsOver() {
+    return RexOver.containsOver(this.getChildExps(), null);
   }
 
 }
