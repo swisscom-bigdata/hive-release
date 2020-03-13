@@ -217,10 +217,13 @@ public class Utils {
     return shouldReplicate(replicationSpec, table, isEventDump, hiveConf);
   }
 
-  public static boolean shouldDumpMetaDataOnly(Table table, HiveConf conf) {
-    return conf.getBoolVar(HiveConf.ConfVars.REPL_DUMP_METADATA_ONLY) ||
-            (conf.getBoolVar(HiveConf.ConfVars.REPL_INCLUDE_EXTERNAL_TABLES) &&
-                    table.getTableType().equals(TableType.EXTERNAL_TABLE) &&
-                    conf.getBoolVar(HiveConf.ConfVars.REPL_DUMP_METADATA_ONLY_FOR_EXTERNAL_TABLE));
+  public static boolean shouldDumpMetaDataOnly(HiveConf conf) {
+    return conf.getBoolVar(HiveConf.ConfVars.REPL_DUMP_METADATA_ONLY);
+  }
+
+  public static boolean shouldDumpMetaDataOnlyForExternalTables(Table table, HiveConf conf) {
+    return (conf.getBoolVar(HiveConf.ConfVars.REPL_INCLUDE_EXTERNAL_TABLES) &&
+            table.getTableType().equals(TableType.EXTERNAL_TABLE) &&
+            conf.getBoolVar(HiveConf.ConfVars.REPL_DUMP_METADATA_ONLY_FOR_EXTERNAL_TABLE));
   }
 }

@@ -27,6 +27,7 @@ import org.apache.hadoop.hive.metastore.InjectableBehaviourObjectStore.Behaviour
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.apache.hadoop.hive.ql.metadata.Hive;
 import org.apache.hadoop.hive.ql.metadata.Partition;
+import org.apache.hadoop.hive.ql.parse.repl.PathBuilder;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.junit.After;
 import org.junit.Assert;
@@ -158,7 +159,8 @@ public class TestReplicationScenariosExternalTablesMetaDataOnly extends BaseRepl
             .run("select country from t2 where country = 'us'")
             .verifyResult(null)
             .run("select country from t2 where country = 'france'")
-            .verifyResult(null);
+            .verifyResult(null)
+            .run("show partitions t2").verifyResults(new String[] {"country=france", "country=india", "country=us"});
 
     // Ckpt should be set on bootstrapped db.
     replica.verifyIfCkptSet(replicatedDbName, tuple.dumpLocation);
@@ -166,7 +168,8 @@ public class TestReplicationScenariosExternalTablesMetaDataOnly extends BaseRepl
     tuple = primary.run("use " + primaryDbName)
             .run("create external table t3 (id int)")
             .run("insert into table t3 values (10)")
-            .run("create external table t4 as select id from t3")
+            .run("create external table t4 (id int)")
+            .run("insert into t4 select id from t3")
             .dump("repl dump " + primaryDbName + " from " + tuple.lastReplicationId);
 
     // verify that the external table info is written correctly for incremental
@@ -236,6 +239,8 @@ public class TestReplicationScenariosExternalTablesMetaDataOnly extends BaseRepl
     // alter table location to something new.
     externalTableLocation =
             new Path("/" + testName.getMethodName() + "/" + primaryDbName + "/new_location/a/");
+    fs.mkdirs(externalTableLocation, new FsPermission("777"));
+    externalTableLocation = PathBuilder.fullyQualifiedHDFSUri(externalTableLocation, fs);
     incrementalTuple = primary.run("use " + primaryDbName)
             .run("alter table a set location '" + externalTableLocation + "'")
             .dump(primaryDbName, incrementalTuple.lastReplicationId);
@@ -269,7 +274,9 @@ public class TestReplicationScenariosExternalTablesMetaDataOnly extends BaseRepl
             .run("show tables like 't2'")
             .verifyResults(new String[] {"t2"})
             .run("select place from t2")
-            .verifyResults(new String[] {});
+            .verifyResults(new String[] {})
+            .run("show partitions t2")
+            .verifyResults(new String[] {"country=india"});
 
     // add new  data externally, to a partition, but under the table level top directory
     Path partitionDir = new Path(externalTableLocation, "country=india");
@@ -287,11 +294,13 @@ public class TestReplicationScenariosExternalTablesMetaDataOnly extends BaseRepl
     replica.load(replicatedDbName, tuple.dumpLocation, loadWithClause)
             .run("use " + replicatedDbName)
             .run("select distinct(country) from t2")
-            .verifyResults(new String[] {})
+            .verifyResults(new String[] {"india", "australia"})
             .run("select place from t2 where country='india'")
             .verifyResults(new String[] {})
             .run("select place from t2 where country='australia'")
-            .verifyResults(new String[] {});
+            .verifyResults(new String[] {})
+            .run("show partitions t2")
+            .verifyResults(new String[] {"country=australia", "country=india"});
 
     Path customPartitionLocation =
             new Path("/" + testName.getMethodName() + "/partition_data/t2/country=france");
@@ -315,25 +324,30 @@ public class TestReplicationScenariosExternalTablesMetaDataOnly extends BaseRepl
 
     // change the location of the partition via alter command
     String tmpLocation = "/tmp/" + System.nanoTime();
+    fs.mkdirs(new Path(tmpLocation), new FsPermission("777"));
+    Path tmpPath = PathBuilder.fullyQualifiedHDFSUri(new Path(tmpLocation), fs);
     primary.miniDFSCluster.getFileSystem().mkdirs(new Path(tmpLocation), new FsPermission("777"));
 
     tuple = primary.run("use " + primaryDbName)
-            .run("alter table t2 partition (country='france') set location '" + tmpLocation + "'")
+            .run("alter table t2 partition (country='france') set location '" + tmpPath + "'")
             .dump(primaryDbName, tuple.lastReplicationId);
 
     replica.load(replicatedDbName, tuple.dumpLocation, loadWithClause)
             .run("use " + replicatedDbName)
             .run("select place from t2 where country='france'")
-            .verifyResults(new String[] {});
+            .verifyResults(new String[] {})
+            .run("show partitions t2")
+            .verifyResults(new String[] {"country=australia", "country=france", "country=india"});
 
     // Changing location of the external table, should result in changes to the location of
     // partition residing within the table location and not the partitions located outside.
     String tmpLocation2 = "/tmp/" + System.nanoTime() + "_2";
     primary.miniDFSCluster.getFileSystem().mkdirs(new Path(tmpLocation2), new FsPermission("777"));
+    tmpPath = PathBuilder.fullyQualifiedHDFSUri(new Path(tmpLocation2), fs);
 
     tuple = primary.run("use " + primaryDbName)
             .run("insert into table t2 partition(country='france') values ('lyon')")
-            .run("alter table t2 set location '" + tmpLocation2 + "'")
+            .run("alter table t2 set location '" + tmpPath + "'")
             .dump(primaryDbName, tuple.lastReplicationId);
 
     replica.load(replicatedDbName, tuple.dumpLocation, loadWithClause);
@@ -531,7 +545,8 @@ public class TestReplicationScenariosExternalTablesMetaDataOnly extends BaseRepl
     // Insert a row into "t1" and create another external table using data from "t1".
     primary.run("use " + primaryDbName)
             .run("insert into table t1 values (2)")
-            .run("create external table t2 as select * from t1");
+            .run("create external table t2 (id int)")
+            .run("insert into t2 select * from t1");
 
     // Inject a behavior so that getTable returns null for table "t1". This ensures the table is
     // skipped for data files listing.

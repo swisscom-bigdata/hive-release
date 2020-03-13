@@ -50,7 +50,8 @@ class UpdatePartColStatHandler extends AbstractEventHandler<UpdatePartitionColum
     Table qlMdTable = new Table(tableObj);
 
     // Statistics without any data does not make sense.
-    if (withinContext.replicationSpec.isMetadataOnly()) {
+    if (withinContext.replicationSpec.isMetadataOnly()
+            || Utils.shouldDumpMetaDataOnlyForExternalTables(new Table(tableObj), withinContext.hiveConf)) {
       return;
     }
 
