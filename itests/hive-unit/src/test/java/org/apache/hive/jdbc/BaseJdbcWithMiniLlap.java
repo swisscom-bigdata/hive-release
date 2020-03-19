@@ -349,33 +349,6 @@ public abstract class BaseJdbcWithMiniLlap {
   }
 
   @Test(timeout = 300000)
-  public void testLlapInputFormatEndToEndWithMultipleBatches() throws Exception {
-    String tableName = "over10k_table";
-
-    createOver10KTable(tableName);
-
-    int rowCount;
-
-    // Try with more than one batch
-    RowCollector rowCollector = new RowCollector();
-    String query = "select * from " + tableName;
-    rowCount = processQuery(query, 1, rowCollector);
-    assertEquals(9999, rowCount);
-
-    // Try with less than one batch
-    rowCollector.rows.clear();
-    query = "select * from " + tableName + " where s = 'rachel brown'";
-    rowCount = processQuery(query, 1, rowCollector);
-    assertEquals(17, rowCount);
-
-    // Try empty rows query
-    rowCollector.rows.clear();
-    query = "select * from " + tableName + " where false";
-    rowCount = processQuery(query, 1, rowCollector);
-    assertEquals(0, rowCount);
-  }
-
-  @Test(timeout = 300000)
   public void testInvalidReferenceCountScenario() throws Exception {
     final String tableName = "testInvalidReferenceCountScenario";
     try (Statement stmt = hs2Conn.createStatement()) {
